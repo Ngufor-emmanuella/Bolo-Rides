@@ -31,7 +31,7 @@ export default function Header() {
           onClick={() => setShowDropdown(!showDropdown)} 
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-          Menu
+          User Accounts
         </button>
         {showDropdown && (
           <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-10">

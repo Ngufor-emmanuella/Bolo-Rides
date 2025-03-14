@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { db, auth } from '@/app/firebase';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc, addDoc } from 'firebase/firestore';
 import { useAuth } from '/context/AuthContext';
 import { format } from 'date-fns';
 
@@ -12,6 +12,10 @@ const UserDashboard = () => {
     const [userName, setUserName] = useState('');
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false); // State to manage sidebar visibility
+    const [destination, setDestination] = useState('');
+    const [rentalRate, setRentalRate] = useState(0);
+    const [date, setDate] = useState('');
+    const [showReports, setShowReports] = useState(false); // State to toggle reports table visibility
     const { currentUser } = useAuth();
 
     useEffect(() => {
@@ -74,6 +78,32 @@ const UserDashboard = () => {
         fetchUserData();
     }, [currentUser]);
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!date || !destination || rentalRate <= 0) {
+            alert("Please fill all fields correctly.");
+            return;
+        }
+        
+        try {
+            await addDoc(collection(db, 'DailyReports'), {
+                userId: currentUser.uid,
+                carId: cars[0]?.id, // Assuming the user has at least one car
+                date: new Date(date),
+                destination,
+                rentalRate,
+                created_at: new Date(),
+                // Add other fields as necessary
+            });
+            // Clear form
+            setDestination('');
+            setRentalRate(0);
+            setDate('');
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
+    };
+
     // Show loading state
     if (loading) {
         return (
@@ -95,7 +125,13 @@ const UserDashboard = () => {
 
             {/* Sidebar (Cars Table) */}
             <aside className={`bg-white shadow-md w-full md:w-64 p-4 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-                <h2 className="text-xl font-semibold mb-3">Your Cars</h2>
+                <h2 className="text-xl font-semibold mb-3">Your Cars Details</h2>
+                <button
+                    onClick={() => setShowReports(!showReports)}
+                    className="mb-3 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
+                >
+                    {showReports ? 'Close Your Daily Reports' : 'View Your Daily Reports'}
+                </button>
                 <div className="overflow-x-auto">
                     <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
                         <thead className="bg-gray-200">
@@ -132,60 +168,96 @@ const UserDashboard = () => {
             <main className="flex-1 p-6 overflow-x-auto"> 
                 <h1 className="text-2xl font-bold mb-5">Welcome {userName || 'User'} to Bolorides</h1>
 
-                <h2 className="text-xl font-semibold mb-3">Your Daily Reports</h2>
-                
-                <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-                    <thead className="bg-gray-200">
-                        <tr>
-                            <th className="py-2 px-4 text-left">Date</th>
-                            <th className="py-2 px-4 text-left">Destination</th>
-                            <th className="py-2 px-4 text-left">Rental Rate Amount</th>
-                            <th className="py-2 px-4 text-left">Num of Rental Days</th>
-                            <th className="py-2 px-4 text-left">Paid Amount</th>
-                            <th className="py-2 px-4 text-left">Total Amount Due</th>
-                            <th className="py-2 px-4 text-left">Balance Amount Due</th>
-                            <th className="py-2 px-4 text-left">Car Expense</th>
-                            <th className="py-2 px-4 text-left">Total Expenses</th>
-                            <th className="py-2 px-4 text-left">Expenses Description</th>
-                            <th className="py-2 px-4 text-left">Driver&apos;s Income</th>
-                            <th className="py-2 px-4 text-left">Driver&apos;s Salary</th>
-                            <th className="py-2 px-4 text-left">Management Fee Acc</th>
-                            <th className="py-2 px-4 text-left">Net Income</th>
-                            <th className="py-2 px-4 text-left">Comments</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {dailyReports.length > 0 ? (
-                            dailyReports.map(report => (
-                                <tr key={report.id} className="hover:bg-gray-100">
-                                    <td className="py-2 px-4">
-                                        {report.date && report.date.toDate
-                                            ? format(report.date.toDate(), 'yyyy-MM-dd HH:mm:ss')
-                                            : 'N/A'}
-                                    </td>
-                                    <td className="py-2 px-4">{report.destination || 'N/A'}</td>
-                                    <td className="py-2 px-4">${report.rental_rate_amount || '0'}</td>
-                                    <td className="py-2 px-4">{report.number_of_rental_days || '0'}</td>
-                                    <td className="py-2 px-4">${report.total_amount_due || '0'}</td>
-                                    <td className="py-2 px-4">${report.balance_amount_due || '0'}</td>
-                                    <td className="py-2 px-4">${report.paid_amount || '0'}</td>
-                                    <td className="py-2 px-4">${report.car_expense || '0'}</td>
-                                    <td className="py-2 px-4">${report.total_expenses || '0'}</td>
-                                    <td className="py-2 px-4">{report.expense_description || 'N/A'}</td>
-                                    <td className="py-2 px-4">${report.driver_income || '0'}</td>
-                                    <td className="py-2 px-4">${report.driver_salary || '0'}</td>
-                                    <td className="py-2 px-4">${report.management_fee_accruals || '0'}</td>
-                                    <td className="py-2 px-4">${report.net_income || '0'}</td>
-                                    <td className="py-2 px-4">{report.comments || 'N/A'}</td>
+                {/* Add Daily Report Form */}
+                <div className="mb-4 p-4 border border-gray-300 rounded shadow-md">
+                    <h2 className="text-xl font-semibold mb-3">Add Daily Report</h2>
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            required
+                            className="border p-2 mb-2 w-full"
+                        />
+                        <input
+                            type="text"
+                            value={destination}
+                            onChange={(e) => setDestination(e.target.value)}
+                            placeholder="Destination"
+                            required
+                            className="border p-2 mb-2 w-full"
+                        />
+                        <input
+                            type="number"
+                            value={rentalRate}
+                            onChange={(e) => setRentalRate(e.target.value)}
+                            placeholder="Rental Rate"
+                            required
+                            className="border p-2 mb-2 w-full"
+                        />
+                        <button type="submit" className="bg-blue-500 text-white p-2 w-full">Submit</button>
+                    </form>
+                </div>
+
+                {/* Daily Reports Table */}
+                {showReports && (
+                    <>
+                    <br></br>
+                        <h2 className="text-xl font-semibold mb-3">Your Daily Reports</h2>
+                        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+                            <thead className="bg-gray-200">
+                                <tr>
+                                    <th className="py-2 px-4 text-left">Date</th>
+                                    <th className="py-2 px-4 text-left">Destination</th>
+                                    <th className="py-2 px-4 text-left">Rental Rate Amount</th>
+                                    <th className="py-2 px-4 text-left">Num of Rental Days</th>
+                                    <th className="py-2 px-4 text-left">Paid Amount</th>
+                                    <th className="py-2 px-4 text-left">Total Amount Due</th>
+                                    <th className="py-2 px-4 text-left">Balance Amount Due</th>
+                                    <th className="py-2 px-4 text-left">Car Expense</th>
+                                    <th className="py-2 px-4 text-left">Total Expenses</th>
+                                    <th className="py-2 px-4 text-left">Expenses Description</th>
+                                    <th className="py-2 px-4 text-left">Driver&apos;s Income</th>
+                                    <th className="py-2 px-4 text-left">Driver&apos;s Salary</th>
+                                    <th className="py-2 px-4 text-left">Management Fee Acc</th>
+                                    <th className="py-2 px-4 text-left">Net Income</th>
+                                    <th className="py-2 px-4 text-left">Comments</th>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={15} className="text-center py-2 px-4">No daily reports found.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                {dailyReports.length > 0 ? (
+                                    dailyReports.map(report => (
+                                        <tr key={report.id} className="hover:bg-gray-100">
+                                            <td className="py-2 px-4">
+                                                {report.date && report.date.toDate
+                                                    ? format(report.date.toDate(), 'yyyy-MM-dd HH:mm:ss')
+                                                    : 'N/A'}
+                                            </td>
+                                            <td className="py-2 px-4">{report.destination || 'N/A'}</td>
+                                            <td className="py-2 px-4">${report.rentalRate || '0'}</td>
+                                            <td className="py-2 px-4">{report.number_of_rental_days || '0'}</td>
+                                            <td className="py-2 px-4">${report.paid_amount || '0'}</td>
+                                            <td className="py-2 px-4">${report.total_amount_due || '0'}</td>
+                                            <td className="py-2 px-4">${report.balance_amount_due || '0'}</td>
+                                            <td className="py-2 px-4">${report.car_expense || '0'}</td>
+                                            <td className="py-2 px-4">${report.total_expenses || '0'}</td>
+                                            <td className="py-2 px-4">{report.expense_description || 'N/A'}</td>
+                                            <td className="py-2 px-4">${report.driver_income || '0'}</td>
+                                            <td className="py-2 px-4">${report.driver_salary || '0'}</td>
+                                            <td className="py-2 px-4">${report.management_fee_accruals || '0'}</td>
+                                            <td className="py-2 px-4">${report.net_income || '0'}</td>
+                                            <td className="py-2 px-4">{report.comments || 'N/A'}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={15} className="text-center py-2 px-4">No daily reports found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </>
+                )}
             </main>
         </div>
     );

@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { doc, setDoc, collection } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, onAuthStateChanged, fetchSignInMethodsForEmail } from 'firebase/auth';
@@ -9,7 +10,9 @@ const SignUpPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState(''); // State to hold error messages
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -24,6 +27,11 @@ const SignUpPage = () => {
     const handleSignUp = async (e) => {
         e.preventDefault();
         setError(''); // Reset error message
+
+        if (password !== confirmPassword) {
+            setError('Passwords do not match. Please check the passwords.');
+            return;
+        }
 
         try {
             // Check if the email already exists
@@ -109,13 +117,38 @@ const SignUpPage = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
                     />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
-                    />
+                    <div className="relative mb-4">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-3 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+                        />
+                        <button
+                            type="button"
+                            className="absolute right-3 top-3 text-white"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? 'Hide' : 'See'}
+                        </button>
+                    </div>
+                    <div className="relative mb-4">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Confirm Password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full p-3 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+                        />
+                        <button
+                            type="button"
+                            className="absolute right-3 top-3 text-white"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? 'Hide' : 'See'}
+                        </button>
+                    </div>
                     <button
                         type="submit"
                         className="w-full p-3 bg-indigo-600 rounded text-white hover:bg-indigo-500"

@@ -34,38 +34,36 @@ export function AuthProvider({ children }) {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async user => {
             try {
-                // set the user to local context state
-
-                setLoading(true)
-                setCurrentUser(user)
+                setLoading(true);
+                setCurrentUser(user);
                 if (!user) {
-                    return
+                    return; // Early return if user is null
                 }
-
-                // if user exist fetch data from firestore database
-                console.log('fetching user data')
-                const docRef = doc(db, 'Users', user.uid)
-                const docSnap = await getDoc(docRef)
-                let firebaseData = {}
+    
+                // Fetch user data from Firestore
+                console.log('fetching user data');
+                const docRef = doc(db, 'Users', user.uid);
+                const docSnap = await getDoc(docRef);
+                let firebaseData = {};
                 if (docSnap.exists()) {
-                    console.log('found user data')
-                    firebaseData = docSnap.data()
-                    console.log(firebaseData)
+                    console.log('found user data');
+                    firebaseData = docSnap.data();
+                    console.log(firebaseData);
                 }
-
-                setUserDataObj(firebaseData)
-
+    
+                setUserDataObj(firebaseData);
+    
             } catch (err) {
-                console.log(err.message)
+                console.log(err.message);
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
-
-        })
-        
-        return unsubscribe
-
-    }, [])
+    
+        });
+    
+        return unsubscribe;
+    
+    }, []);
 
     const value = {
         currentUser,

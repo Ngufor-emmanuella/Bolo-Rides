@@ -1,10 +1,12 @@
-'use client';
-
+'use client'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/app/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import logo from '../../public/assets/bolo-logo1.jpeg';
 
 export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -17,8 +19,13 @@ export default function Header() {
   };
 
   return (
-    <header className="p-4 sm:p-8 flex items-center justify-between gap-4">
-      <h1 className="text-base sm:text-lg">Bolo Rides</h1>
+    <header className="p-2 sm:p-8 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-1">
+        <Image src={logo} alt="Logo" width={100} height={100} />
+        <h1 className="text-base sm:text-lg">
+          <Link href="/">Bolo Rides</Link>
+        </h1>
+      </div>
       <div className="relative">
         <button 
           onClick={() => setShowDropdown(!showDropdown)} 

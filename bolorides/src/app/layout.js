@@ -20,10 +20,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <AuthProvider> 
-        <body className={'w-full max-w-[1000px] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ' + inter.className}>
-          <Header /> {/* Use Header component here */}
-          {children}
-          {footer}
+        <body className={'w-full max-w-[100%] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ' + inter.className}>
+          <Header />
+          <main className="flex-1">{children}</main>
+          {/* {footer} */}
         </body>
       </AuthProvider>
     </html>

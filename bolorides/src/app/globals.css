@@ -15,3 +15,20 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* css code for home page */
+
+.background-image {
+  background-image: url('/assets/prado.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.overlay {
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
+  padding: 24px;
+  text-align: center;
+  justify-content: center;
+}
+

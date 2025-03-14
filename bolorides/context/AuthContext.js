@@ -1,7 +1,8 @@
 'use client'
-import React, {useContext, useState, useEffect } from 'react'
-import {auth, db } from '@/app/firebase'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import React, { useContext, useState, useEffect } from 'react'
+import { auth, db } from '@/app/firebase'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, getDoc } from 'firebase/firestore'  // <--- ADD THIS IMPORT
 
 const AuthContext = React.createContext()
 
@@ -43,7 +44,7 @@ export function AuthProvider({ children }) {
 
                 // if user exist fetch data from firestore database
                 console.log('fetching user data')
-                const docRef = doc(db, 'Users', user.uid )
+                const docRef = doc(db, 'Users', user.uid)
                 const docSnap = await getDoc(docRef)
                 let firebaseData = {}
                 if (docSnap.exists()) {

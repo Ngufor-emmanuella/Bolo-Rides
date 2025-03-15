@@ -47,7 +47,7 @@ const SignIn = () => {
 
         // Validate input
         if (!email || !password) {
-            setErrorMessage('Please enter both email and password.');
+            setErrorMessage('Please enter both email and password, or ');
             return;
         }
 
@@ -73,34 +73,36 @@ const SignIn = () => {
     }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-900">
-            <div className="bg-gray-800 p-10 rounded-lg shadow-xl w-96">
-                <h1 className="text-white text-2xl mb-5">Sign In</h1>
+        <div className="sign-background flex items-center justify-center min-h-screen">
+            <div className="signup p-10 rounded-lg shadow-xl w-96">
+                <h1 className=" text-2xl mb-5">Sign In</h1>
                 <form onSubmit={handleSubmit}>
+                    <label>Email :</label>
                     <input
                         type="email"
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+                        className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-white-700"
                     />
+                      <label>Password :</label>
                     <input
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+                        className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-white-700"
                     />
                     <button
                         type="submit"
-                        className="w-full p-3 bg-indigo-600 rounded text-white hover:bg-indigo-500"
+                        className="submit-btn w-full p-3 rounded text-white"
                     >
                         Sign In
                     </button>
                 </form>
                 {errorMessage && (
                     <div className="bg-red-100 border border-red-400 text-red-700 font-bold px-4 py-3 rounded mt-4 relative" role="alert">
-                        <span className="block sm:inline">{errorMessage} <a href="/Sign-up" className="text-blue-500 hover:underline">Create an account</a></span>
+                        <span className="block sm:inline">{errorMessage} <a href="/Sign-up" className="text-gray-700 hover:underline">Create an account</a></span>
                     </div>
                 )}
             </div>

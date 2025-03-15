@@ -98,11 +98,12 @@ const SignUpPage = () => {
     };
     
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900">
-            <div className="bg-gray-800 p-10 rounded-lg shadow-xl w-96">
-                <h1 className="text-white text-2xl mb-5">Sign Up</h1>
+        <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+            <div className="signup  p-10 rounded-lg shadow-xl w-96">
+                <h1 className=" text-2xl mb-5">Sign Up</h1>
                 {error && <p className="text-red-500">{error}</p>} 
                 <form onSubmit={handleSignUp}>
+                <label>User Name :</label>
                     <input
                         type="text"
                         placeholder="Name"
@@ -110,6 +111,7 @@ const SignUpPage = () => {
                         onChange={(e) => setName(e.target.value)}
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
                     />
+                     <label>Email :</label>
                     <input
                         type="email"
                         placeholder="Email"
@@ -117,7 +119,9 @@ const SignUpPage = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
                     />
+                     <label>Password :</label>
                     <div className="relative mb-4">
+                   
                         <input
                             type={showPassword ? 'text' : 'password'}
                             placeholder="Password"
@@ -133,6 +137,7 @@ const SignUpPage = () => {
                             {showPassword ? 'Hide' : 'See'}
                         </button>
                     </div>
+                    <label>Repeat Password :</label>
                     <div className="relative mb-4">
                         <input
                             type={showPassword ? 'text' : 'password'}
@@ -151,7 +156,7 @@ const SignUpPage = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full p-3 bg-indigo-600 rounded text-white hover:bg-indigo-500"
+                        className="submit-btn w-full p-3  rounded text-white "
                     >
                         Sign Up
                     </button>

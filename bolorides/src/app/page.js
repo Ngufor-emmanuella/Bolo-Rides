@@ -21,11 +21,11 @@ export default function HomePage() {
   return (
     <div className="h-screen w-full mx-0 px-0 background-image relative flex flex-col">
       <div className="absolute inset-0 overlay flex flex-col justify-center items-center p-6">
-        <h1 className="text-white text-4xl font-bold text-center mb-6">Welcome to Bolo Rides!</h1>
-        <h2 className="text-white text-3xl font-bold text-center mb-6">BOLO CAR RENTALS</h2>
-        <h2 className="text-white text-3xl font-bold text-center mb-6">SERVICES -</h2>
-        <h5 className="text-white text-2xl font-bold text-center mb-8">THE BEST CAR RENTALS IN CAMEROON!</h5>
-        <Link className="btn btn-white inline-block mb-8" href="/contact">Book Us Now</Link>
+        <h1 className="header-text text-white text-4xl font-bold text-center mb-6">Welcome to Bolo Rides!</h1>
+        <h2 className="header-text text-white text-3xl font-bold text-center mb-6">BOLO CAR RENTALS</h2>
+        <h2 className="header-text text-white text-3xl font-bold text-center mb-6">SERVICES -</h2>
+        <h5 className="header-add text-white text-2xl font-bold text-center mb-8">THE BEST CAR RENTALS IN CAMEROON!</h5>
+        <Link className="header-btn btn btn-white inline-block mb-8" href="/contact">Book Us Now</Link>
      </div>
 
       {/* Cards */}
@@ -131,13 +131,13 @@ export default function HomePage() {
     <br></br>
 
   </div>
-  <br></br>
+ 
 
-  <div className="flex justify-between p-15">
-    <div className="w-1/2">
+  <div className="flex justify-between p-30">
+    <div className="objectives w-1/3">
       <h2 className="text-2xl font-bold mb-4">Our Mission
         <br></br>
-        &quot; Empowering Freedom on the Road &quot;
+        &quot;Empowering Freedom on the Road &quot;
       </h2>
       <br></br>
       <p className="text-lg">
@@ -145,10 +145,10 @@ export default function HomePage() {
       </p>
     </div>
 
-    <div className="w-1/2">
+    <div className="objectives w-1/3">
   <h2 className="text-2xl font-bold mb-8"> Our Vision
     <br></br>
-    &quot; Transforming Travel, Enriching Lives &quot;
+    &quot;Transforming Travel, Enriching Lives &quot;
   </h2>
   <p className="text-lg">
     Our vision is to revolutionize the car rental industry by setting new standards in convenience, sustainability, and customer delight. We envision a future where every traveler can experience the thrill of exploration with ease, comfort, and peace of mind. By fostering a culture of innovation, inclusivity, and excellence, we aim to be the global leader in car rental services, making every journey a remarkable one.

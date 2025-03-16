@@ -11,23 +11,23 @@ const UserDashboard = () => {
     const [dailyReports, setDailyReports] = useState([]);
     const [userName, setUserName] = useState('');
     const [loading, setLoading] = useState(true);
-    const [sidebarOpen, setSidebarOpen] = useState(false); // State to manage sidebar visibility
-    const [dynamicFields, setDynamicFields] = useState([
-        {
-            date: '',
-            destination: '',
-            rentalRate: 0,
-            numOfRentalDays: 0,
-            paidAmount: 0,
-            driverIncome: 0,
-            expense: 0,
-            expenseDescription: '',
-            comments: '',
-        },
-    ]);
-    const [showReports, setShowReports] = useState(false); // State to toggle reports table visibility
-    const [formType, setFormType] = useState('revenue'); // State to toggle form type
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [dynamicFields, setDynamicFields] = useState([{
+        date: '',
+        destination: '',
+        rental_rate_amount: 0,
+        number_of_rental_days: 1,
+        paid_amount: 0,
+        driver_income: 0,
+        car_expense: 0,
+        expense_description: '',
+        comments: '',
+    }]);
+    const [showReports, setShowReports] = useState(false);
+    const [formType, setFormType] = useState('revenue');
     const { currentUser } = useAuth();
+    const [message, setMessage] = useState(''); // State for popup message
+    const [showMessage, setShowMessage] = useState(false); // State to control message visibility
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -84,12 +84,12 @@ const UserDashboard = () => {
             {
                 date: '',
                 destination: '',
-                rentalRate: 0,
-                numOfRentalDays: 0,
-                paidAmount: 0,
-                driverIncome: 0,
-                expense: 0,
-                expenseDescription: '',
+                rental_rate_amount: 0,
+                number_of_rental_days: 1,
+                paid_amount: 0,
+                driver_income: 0,
+                car_expense: 0,
+                expense_description: '',
                 comments: '',
             },
         ]);
@@ -116,20 +116,22 @@ const UserDashboard = () => {
                 if (
                     !field.date ||
                     !field.destination ||
-                    field.rentalRate <= 0 ||
-                    field.numOfRentalDays <= 0 ||
-                    field.paidAmount <= 0 ||
-                    field.driverIncome <= 0
+                    field.rental_rate_amount <= 0 ||
+                    field.number_of_rental_days <= 1 ||
+                    field.paid_amount <= 0 ||
+                    field.driver_income <= 0
                 ) {
-                    alert("Please fill all revenue fields correctly.");
+                    setMessage("Data not sent, review your fields.");
+                    setShowMessage(true);
                     return;
                 }
             }
         } else {
             // Validate expense form fields
             for (const field of dynamicFields) {
-                if (field.expense <= 0 || !field.expenseDescription) {
-                    alert("Please fill all expense fields correctly.");
+                if (field.car_expense <= 0 || !field.expense_description) {
+                    setMessage("Data not sent, review your fields.");
+                    setShowMessage(true);
                     return;
                 }
             }
@@ -138,22 +140,23 @@ const UserDashboard = () => {
         try {
             const reportData = {
                 userId: currentUser.uid,
-                carId: cars[0]?.id, // Assuming the user has at least one car
+                userName: userName,
+                carId: cars[0]?.id,
                 created_at: new Date(),
                 entries: dynamicFields.map((field) => {
                     if (formType === 'revenue') {
                         return {
                             date: new Date(field.date),
                             destination: field.destination,
-                            rentalRate: field.rentalRate,
-                            number_of_rental_days: field.numOfRentalDays,
-                            paid_amount: field.paidAmount,
-                            driver_income: field.driverIncome,
+                            rental_rate_amount: field.rental_rate_amount,
+                            number_of_rental_days: field.number_of_rental_days,
+                            paid_amount: field.paid_amount,
+                            driver_income: field.driver_income,
                         };
                     } else {
                         return {
-                            expense: field.expense,
-                            expense_description: field.expenseDescription,
+                            car_expense: field.car_expense,
+                            expense_description: field.expense_description,
                             comments: field.comments,
                         };
                     }
@@ -163,21 +166,25 @@ const UserDashboard = () => {
             await addDoc(collection(db, 'DailyReports'), reportData);
 
             // Clear form
-            setDynamicFields([
-                {
-                    date: '',
-                    destination: '',
-                    rentalRate: 0,
-                    numOfRentalDays: 0,
-                    paidAmount: 0,
-                    driverIncome: 0,
-                    expense: 0,
-                    expenseDescription: '',
-                    comments: '',
-                },
-            ]);
+            setDynamicFields([{
+                date: '',
+                destination: '',
+                rental_rate_amount: 0,
+                number_of_rental_days: 1,
+                paid_amount: 0,
+                driver_income: 0,
+                car_expense: 0,
+                expense_description: '',
+                comments: '',
+            }]);
+
+            // Show success message
+            setMessage("Data has been successfully submitted.");
+            setShowMessage(true);
         } catch (error) {
             console.error('Error adding document: ', error);
+            setMessage("Data not sent, please try again.");
+            setShowMessage(true);
         }
     };
 
@@ -246,6 +253,14 @@ const UserDashboard = () => {
                 <h1 className="dashboard-head text-2xl font-bold mb-5">Welcome &quot; {userName || 'User'} &quot; to Bolorides</h1>
                 <br />
 
+                {/* Popup Message */}
+                {/* {showMessage && (
+                    <div className="popup-message">
+                        <p>{message}</p>
+                        <button onClick={() => setShowMessage(false)} className="close-btn">Close</button>
+                    </div>
+                )} */}
+
                 {/* Conditional Rendering for Add Daily Report Form and Daily Reports Table */}
                 {!showReports ? (
                     <div className="flex items-center justify-center">
@@ -259,7 +274,7 @@ const UserDashboard = () => {
                                             value="revenue"
                                             checked={formType === 'revenue'}
                                             onChange={() => setFormType('revenue')}
-                                            className="mr-2 accent-[#9b2f2f]" // Change accent color for radio button
+                                            className="mr-2 accent-[#9b2f2f]"
                                         />
                                         Revenue
                                     </label>
@@ -269,7 +284,7 @@ const UserDashboard = () => {
                                             value="expenses"
                                             checked={formType === 'expenses'}
                                             onChange={() => setFormType('expenses')}
-                                            className="mr-2 accent-[#9b2f2f]" // Change accent color for radio button
+                                            className="mr-2 accent-[#9b2f2f]"
                                         />
                                         Car Expenses
                                     </label>
@@ -303,9 +318,9 @@ const UserDashboard = () => {
                                                 <label>Rental Rate Amount:</label>
                                                 <input
                                                     type="number"
-                                                    value={field.rentalRate}
+                                                    value={field.rental_rate_amount}
                                                     onChange={(e) =>
-                                                        updateField(index, 'rentalRate', e.target.value)
+                                                        updateField(index, 'rental_rate_amount', e.target.value)
                                                     }
                                                     placeholder="Rental Rate Amount"
                                                     required
@@ -314,9 +329,9 @@ const UserDashboard = () => {
                                                 <label>Num of Rental Days:</label>
                                                 <input
                                                     type="number"
-                                                    value={field.numOfRentalDays}
+                                                    value={field.number_of_rental_days}
                                                     onChange={(e) =>
-                                                        updateField(index, 'numOfRentalDays', e.target.value)
+                                                        updateField(index, 'number_of_rental_days', e.target.value)
                                                     }
                                                     placeholder="Num of Rental Days"
                                                     required
@@ -325,9 +340,9 @@ const UserDashboard = () => {
                                                 <label>Paid Amount:</label>
                                                 <input
                                                     type="number"
-                                                    value={field.paidAmount}
+                                                    value={field.paid_amount}
                                                     onChange={(e) =>
-                                                        updateField(index, 'paidAmount', e.target.value)
+                                                        updateField(index, 'paid_amount', e.target.value)
                                                     }
                                                     placeholder="Paid Amount"
                                                     required
@@ -336,9 +351,9 @@ const UserDashboard = () => {
                                                 <label>Driver Income:</label>
                                                 <input
                                                     type="number"
-                                                    value={field.driverIncome}
+                                                    value={field.driver_income}
                                                     onChange={(e) =>
-                                                        updateField(index, 'driverIncome', e.target.value)
+                                                        updateField(index, 'driver_income', e.target.value)
                                                     }
                                                     placeholder="Driver Income:"
                                                     required
@@ -351,9 +366,9 @@ const UserDashboard = () => {
                                                 <label>Expense Amount:</label>
                                                 <input
                                                     type="number"
-                                                    value={field.expense}
+                                                    value={field.car_expense}
                                                     onChange={(e) =>
-                                                        updateField(index, 'expense', e.target.value)
+                                                        updateField(index, 'car_expense', e.target.value)
                                                     }
                                                     placeholder="Expense Amount"
                                                     required
@@ -362,9 +377,9 @@ const UserDashboard = () => {
                                                 <label>Expense Description:</label>
                                                 <input
                                                     type="text"
-                                                    value={field.expenseDescription}
+                                                    value={field.expense_description}
                                                     onChange={(e) =>
-                                                        updateField(index, 'expenseDescription', e.target.value)
+                                                        updateField(index, 'expense_description', e.target.value)
                                                     }
                                                     placeholder="Expense Description"
                                                     required
@@ -401,6 +416,13 @@ const UserDashboard = () => {
                                 <button type="submit" className="dashboard-btn text-white p-2 w-full">
                                     Submit
                                 </button>
+
+                                {showMessage && (
+                                    <div className="popup-message">
+                                        <p className="reporting mt-4 text-center text-green-600">{message}</p>
+                                        <button onClick={() => setShowMessage(false)} className="dashboard-btn">Close</button>
+                                    </div>
+                                )}
                             </form>
                         </div>
                     </div>
@@ -420,44 +442,50 @@ const UserDashboard = () => {
                                     <th className="py-2 px-4 text-left">Car Expense</th>
                                     <th className="py-2 px-4 text-left">Total Expenses</th>
                                     <th className="py-2 px-4 text-left">Expenses Description</th>
-                                    <th className="py-2 px-4 text-left">Driver's Income</th>
-                                    <th className="py-2 px-4 text-left">Driver's Salary</th>
+                                    <th className="py-2 px-4 text-left">Driver&apos;s Income</th>
+                                    <th className="py-2 px-4 text-left">Driver&apos;s Salary</th>
                                     <th className="py-2 px-4 text-left">Management Fee Acc</th>
                                     <th className="py-2 px-4 text-left">Net Income</th>
                                     <th className="py-2 px-4 text-left">Comments</th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                {dailyReports.length > 0 ? (
-                                    dailyReports.map(report => (
-                                        <tr key={report.id} className="hover:bg-gray-100">
-                                            <td className="py-2 px-4">
-                                                {report.date && report.date.toDate
-                                                    ? format(report.date.toDate(), 'yyyy-MM-dd HH:mm:ss')
-                                                    : 'N/A'}
-                                            </td>
-                                            <td className="py-2 px-4">{report.destination || 'N/A'}</td>
-                                            <td className="py-2 px-4">${report.rentalRate || '0'}</td>
-                                            <td className="py-2 px-4">{report.number_of_rental_days || '0'}</td>
-                                            <td className="py-2 px-4">${report.paid_amount || '0'}</td>
-                                            <td className="py-2 px-4">${report.total_amount_due || '0'}</td>
-                                            <td className="py-2 px-4">${report.balance_amount_due || '0'}</td>
-                                            <td className="py-2 px-4">${report.car_expense || '0'}</td>
-                                            <td className="py-2 px-4">${report.total_expenses || '0'}</td>
-                                            <td className="py-2 px-4">{report.expense_description || 'N/A'}</td>
-                                            <td className="py-2 px-4">${report.driver_income || '0'}</td>
-                                            <td className="py-2 px-4">${report.driver_salary || '0'}</td>
-                                            <td className="py-2 px-4">${report.management_fee_accruals || '0'}</td>
-                                            <td className="py-2 px-4">${report.net_income || '0'}</td>
-                                            <td className="py-2 px-4">{report.comments || 'N/A'}</td>
+                            {dailyReports.length > 0 ? (
+                                dailyReports.map(report => {
+                                    const entries = report.entries || []; // Fallback to empty array if entries is undefined
+
+                                    return entries.length > 0 ? (
+                                        entries.map((entry, entryIndex) => (
+                                            <tr key={`${report.id}-${entryIndex}`} className="hover:bg-gray-100">
+                                                <td className="py-2 px-4">{entry.date ? format(entry.date.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</td>
+                                                <td className="py-2 px-4">{entry.destination || 'N/A'}</td>
+                                                <td className="py-2 px-4">CFA {entry.rental_rate_amount || '0'}</td>
+                                                <td className="py-2 px-4">{entry.number_of_rental_days || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.paid_amount || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.total_amount_due || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.car_expense || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.total_expenses || '0'}</td>
+                                                <td className="py-2 px-4">{entry.expense_description || 'N/A'}</td>
+                                                <td className="py-2 px-4">CFA {entry.driver_income || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.driver_salary || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.management_fee_accruals || '0'}</td>
+                                                <td className="py-2 px-4">CFA {entry.net_income || '0'}</td>
+                                                <td className="py-2 px-4">{entry.comments || 'N/A'}</td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr key={report.id}>
+                                            <td colSpan={15} className="py-2 px-4 text-center">.</td>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={15} className="text-center py-2 px-4">No daily reports found.</td>
-                                    </tr>
-                                )}
-                            </tbody>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan={15} className="text-center py-2 px-4">No daily reports found.</td>
+                                </tr>
+                            )}
+                        </tbody>                       
                         </table>
                     </>
                 )}

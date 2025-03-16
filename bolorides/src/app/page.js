@@ -25,13 +25,13 @@ export default function HomePage() {
         <h2 className="header-text text-white text-3xl font-bold text-center mb-6">BOLO CAR RENTALS</h2>
         <h2 className="header-text text-white text-3xl font-bold text-center mb-6">SERVICES -</h2>
         <h5 className="header-add text-white text-2xl font-bold text-center mb-8">THE BEST CAR RENTALS IN CAMEROON!</h5>
-        <Link className="header-btn btn btn-white inline-block mb-8" href="/contact">Book Us Now</Link>
+        <Link className="header-btn btn btn-white inline-block mb-8" href="/contact">Book Us Now!!</Link>
      </div>
 
       {/* Cards */}
 
       <div className="relative top-full mb-5 flex-1">
-  <div className="flex justify-center flex-1 -mt-20 ">
+  <div className="flex justify-center flex-1 -mt-13 ">
     <div className="card w-52 bg-white shadow-xl mx-4 flex flex-col items-center justify-center rounded-lg">
       <figure className="w-full">
         <Image
@@ -126,37 +126,69 @@ export default function HomePage() {
 
      {/* objectives */}
      <div className="relative top-full mb-5 flex-1">
-  <div className="flex justify-center flex-1 -mt-20 ">
-    {/* Cards here */}
-    <br></br>
+      <div className="flex justify-center flex-1 -mt-20 ">
+        {/* Cards here */}
+        <br></br>
 
-  </div>
+      </div>
  
 
-  <div className="flex justify-between p-30">
-    <div className="objectives w-1/3">
-      <h2 className="text-2xl font-bold mb-4">Our Mission
-        <br></br>
-        &quot;Empowering Freedom on the Road &quot;
-      </h2>
-      <br></br>
-      <p className="text-lg">
-      At Bolo Rides, our mission is to provide seamless, reliable, and personalized car rental experiences that unlock the freedom to explore. We are dedicated to delivering exceptional service, ensuring every journey is memorable, safe, and enjoyable. With a focus on quality, innovation, and customer satisfaction, we strive to be the trusted partner for all your travel needs
-      </p>
-    </div>
+        <div className="flex justify-evenly p-15 ">
+            <div className="objectives w-1/2">
+            
+              <h2 className="text-2xl font-bold mb-4">Our Mission
+                <br></br>
+                &quot;Empowering Freedom on the Road &quot;
+              </h2>
+              
+              <p className="text-lg">
+              At Bolo Rides, our mission is to provide seamless, reliable, and personalized car rental experiences that unlock the freedom to explore. We are dedicated to delivering exceptional service, ensuring every journey is memorable, safe, and enjoyable. 
+              </p>
+            </div>
 
-    <div className="objectives w-1/3">
-  <h2 className="text-2xl font-bold mb-8"> Our Vision
-    <br></br>
-    &quot;Transforming Travel, Enriching Lives &quot;
-  </h2>
-  <p className="text-lg">
-    Our vision is to revolutionize the car rental industry by setting new standards in convenience, sustainability, and customer delight. We envision a future where every traveler can experience the thrill of exploration with ease, comfort, and peace of mind. By fostering a culture of innovation, inclusivity, and excellence, we aim to be the global leader in car rental services, making every journey a remarkable one.
-  </p>
-   </div>
+              <div className="objectives w-1/2">
+            <h2 className="text-2xl font-bold mb-4"> Our Vision
+              <br></br>
+              &quot;Transforming Travel, Enriching Lives &quot;
+            </h2>
+            <p className="text-lg">
+              Our vision is to revolutionize the car rental industry by setting new standards in convenience, sustainability, and customer delight. We envision a future where every traveler can experience the thrill of exploration with ease, comfort, and peace of mind. 
+            </p>
+            </div>
 
-  </div>
-</div>
+        </div>
+      </div>
+
+      {/* our pride */}
+
+      {/* <div>
+        <h2 className="about-header"> <strong className="about-welcome"> Your Reliable Ride Across Cameroon! </strong> </h2>
+          
+          <p className="about-paragragh"> Whether you’re heading across town or traveling to a special event, BoloRides offers safe, 
+            comfortable, and affordable transportation. We pride ourselves on delivering top-notch service 
+            throughout Douala and beyond.
+          </p>
+      </div> */}
+
+      {/* div for sliders of four cars here */}
+      {/* <div>
+        <h2>See some of our Cars</h2>
+      </div> */}
+
+      {/* div to display cards in boxes here*/}
+
+      {/* <div>
+        <h2> Why We Are The Best</h2>
+      </div> */}
+
+      {/* div for a call to action */}
+      {/* <div>
+        <h4 className="about-welcome" > Join Bolo Ride Today! </h4>
+        <p  className="about-paragragh">
+        <strong  className="about-header"> Book Your Ride? </strong> 
+        Message us on Facebook or call <strong> +237 652 921000 </strong> to book your next trip with BoloRides. 
+        We’ll get you where you need to go, safely and on time.</p> 
+      </div> */}
     
     </div>
   );

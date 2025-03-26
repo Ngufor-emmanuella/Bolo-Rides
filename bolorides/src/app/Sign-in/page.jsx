@@ -1,81 +1,60 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useSignInWithEmailAndPassword } from 'react-firebase-hooks/auth';
-import { auth } from '@/app/firebase';
+
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/app/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/app/firebase';
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [signInWithEmailAndPassword, firebaseUser, loading, error] = useSignInWithEmailAndPassword(auth);
-    const router = useRouter();
     const [errorMessage, setErrorMessage] = useState('');
-
-    useEffect(() => {
-        const handleSignIn = async () => {
-            if (firebaseUser) {
-                const uid = firebaseUser.user.uid;
-                const docRef = doc(db, 'Users', uid);
-                const docSnap = await getDoc(docRef);
-
-                if (!docSnap.exists()) {
-                    setErrorMessage('Account does not exist. Please create an account.');
-                } else {
-                    const userData = docSnap.data();
-                    if (!userData || !userData.role) {
-                        console.error("User data or role is undefined");
-                        return;
-                    }
-
-                    // Redirect based on role
-                    if (userData.role === 'admin') {
-                        router.push('/dashboard/AdminDashboard');
-                    } else {
-                        router.push(`/dashboard/${uid}`);
-                    }
-                }
-            }
-        };
-        handleSignIn();
-    }, [firebaseUser, router]);
+    const [loading, setLoading] = useState(false); 
+    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErrorMessage(''); // Clear previous error messages
+        setErrorMessage('');
+        setLoading(true); 
 
-        // Validate input
         if (!email || !password) {
-            setErrorMessage('Please enter both email and password, or ');
-            return;
-        }
-
-        // Validate email format
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
-            setErrorMessage('Please enter a valid email address.');
+            setErrorMessage('Please enter both email and password.');
+            setLoading(false); 
             return;
         }
 
         try {
-            await signInWithEmailAndPassword(email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Redirect to the user's dashboard on successful sign-in
+            router.push(`/dashboard/${user.uid}`);
+
         } catch (signInError) {
             console.error('Error signing in:', signInError);
-            if (signInError.code === 'auth/user-not-found') {
-                setErrorMessage('This account does not exist. Please create an account.');
-            } else if (signInError.code === 'auth/wrong-password') {
-                setErrorMessage('Incorrect password. Please try again.');
-            } else {
-                setErrorMessage('An error occurred: ' + signInError.message);
+            setLoading(false); 
+
+           
+            switch(signInError.code) {
+                case 'auth/user-not-found':
+                    setErrorMessage('This account does not exist. Please create an account.');
+                    break;
+                case 'auth/wrong-password':
+                    setErrorMessage('Incorrect password. Please try again.');
+                    break;
+                case 'auth/too-many-requests':
+                    setErrorMessage('Too many unsuccessful login attempts. Please try again later.');
+                    break;
+                default:
+                    setErrorMessage('An error occurred: ' + signInError.message);
             }
         }
-    }
+    };
 
     return (
         <div className="sign-background flex items-center justify-center min-h-screen">
             <div className="signup p-10 rounded-lg shadow-xl w-96">
-                <h1 className=" text-2xl mb-5">Sign In</h1>
+                <h1 className="text-2xl mb-5">Sign In</h1>
                 <form onSubmit={handleSubmit}>
                     <label>Email :</label>
                     <input
@@ -84,20 +63,23 @@ const SignIn = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-white-700"
+                        required
                     />
-                      <label>Password :</label>
+                    <label>Password :</label>
                     <input
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-white-700"
+                        required
                     />
                     <button
                         type="submit"
                         className="submit-btn w-full p-3 rounded text-white"
+                        disabled={loading} 
                     >
-                        Sign In
+                        {loading ? 'Signing In...Hold On' : 'Sign In'}
                     </button>
                 </form>
                 {errorMessage && (

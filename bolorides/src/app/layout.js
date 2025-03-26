@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from '../../context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import Header from '@/components/Header';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -11,21 +11,17 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const footer = ( 
-    <footer className='p-4 sm:p-8'>
-      hi footer
-    </footer>
-  );
-
   return (
     <html lang="en">
-      <AuthProvider> 
-        <body className={'w-full max-w-[100%] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ' + inter.className}>
+      <body className={'w-full max-w-[100%] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ' + inter.className}>
+        <AuthProvider> 
           <Header />
           <main className="flex-1">{children}</main>
-          {/* {footer} */}
-        </body>
-      </AuthProvider>
+          <footer className='p-4 sm:p-8'>
+            hi footer
+          </footer>
+        </AuthProvider>
+      </body>
     </html>
   );
 }

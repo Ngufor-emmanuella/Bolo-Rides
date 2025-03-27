@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
 import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
+import AllDailyReports from './AllDailyReports'; 
 
 const CarList = ({ userId, userName }) => {
     const [cars, setCars] = useState([]);
@@ -9,6 +10,7 @@ const CarList = ({ userId, userName }) => {
     const [success, setSuccess] = useState('');
     const [activeCarId, setActiveCarId] = useState(null);
     const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
+    const [showReports, setShowReports] = useState(false); 
 
     useEffect(() => {
         const fetchCars = async () => {
@@ -116,13 +118,29 @@ const CarList = ({ userId, userName }) => {
                 cars.map(car => (
                     <div key={car.id} className="mb-4 border p-4 rounded shadow">
                         <h2 className="text-xl font-semibold">{car.carName}</h2>
+
                         <button
                             onClick={() => setActiveCarId(car.id === activeCarId ? null : car.id)}
                             className="bg-blue-500 text-white p-2 rounded mb-2"
                         >
                             {activeCarId === car.id ? 'Cancel Daily Report' : 'Add Daily Report'}
                         </button>
-                        {activeCarId === car.id && (
+
+                        <button
+                            onClick={() => {
+                                setShowReports(!showReports);
+                                setActiveCarId(car.id); // Ensure the car ID is set when toggling reports
+                            }}
+                            className="bg-green-500 text-white p-2 rounded mb-2 ml-2"
+                        >
+                            {showReports ? 'Hide All Transactions' : 'See All Transactions'}
+                        </button>
+
+                        {showReports && activeCarId === car.id && (
+                            <AllDailyReports carId={car.id} userId={userId} />
+                        )}
+
+                        {activeCarId === car.id && !showReports && (
                             <div>
                                 {transactions.map((transaction, index) => (
                                     <div key={index} className="mb-4">
@@ -166,7 +184,6 @@ const CarList = ({ userId, userName }) => {
                                                     required
                                                     className="border p-2 rounded"
                                                 />
-                                                
                                                 <label>Destination:</label>
                                                 <input
                                                     type="text"
@@ -204,7 +221,6 @@ const CarList = ({ userId, userName }) => {
                                                     onChange={(e) => handleTransactionChange(index, 'paidAmount', Number(e.target.value))}
                                                     className="border p-2 rounded"
                                                 />
-                                                
                                                 <div className="flex flex-col">
                                                     <label>Amount Due: {transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays || 0}</label>
                                                     <label style={{ color: (transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays - (transaction.data.paidAmount || 0)) > 0 ? 'red' : 'black' }}>

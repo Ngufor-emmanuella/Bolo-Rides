@@ -50,6 +50,8 @@ const CarList = ({ userId, userName }) => {
         const { type, data } = transactions[index];
 
         try {
+            const carName = cars.find(car => car.id === carId)?.carName; // Get the carName here
+
             if (type === 'revenue') {
                 const { destination, rentalRateAmount, numberOfRentalDays, paidAmount, transactionDate } = data;
 
@@ -70,7 +72,9 @@ const CarList = ({ userId, userName }) => {
                     paid_amount: paidAmount,
                     balance_amount: balanceAmount < 0 ? 0 : balanceAmount,
                     carId,
+                    carName,
                     userId,
+                    userName,
                     created_at: new Date(),
                 };
 
@@ -86,7 +90,9 @@ const CarList = ({ userId, userName }) => {
                     comments,
                     transaction_date: transactionDate,
                     carId,
+                    carName,
                     userId,
+                    userName,
                     created_at: new Date(),
                 };
 
@@ -106,8 +112,6 @@ const CarList = ({ userId, userName }) => {
     return (
         <div>
             <h1 className="text-2xl font-bold mb-4">Cars Owned by {userName}</h1>
-            {error && <p className="text-red-500">{error}</p>}
-            {success && <p className="text-green-500">{success}</p>}
             {cars.length > 0 ? (
                 cars.map(car => (
                     <div key={car.id} className="mb-4 border p-4 rounded shadow">
@@ -154,6 +158,16 @@ const CarList = ({ userId, userName }) => {
 
                                         {transaction.type === 'revenue' && (
                                             <form onSubmit={(e) => { e.preventDefault(); handleAddReport(car.id, index); }} className="flex flex-col space-y-4">
+                                                <label>Transaction date:</label>
+                                                <input
+                                                    type="date"
+                                                    value={transaction.data.transactionDate || ''}
+                                                    onChange={(e) => handleTransactionChange(index, 'transactionDate', e.target.value)}
+                                                    required
+                                                    className="border p-2 rounded"
+                                                />
+                                                
+                                                <label>Destination:</label>
                                                 <input
                                                     type="text"
                                                     placeholder="Destination"
@@ -162,6 +176,7 @@ const CarList = ({ userId, userName }) => {
                                                     required
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Rental rate amount:</label>
                                                 <input
                                                     type="number"
                                                     placeholder="Rental Rate Amount"
@@ -171,6 +186,7 @@ const CarList = ({ userId, userName }) => {
                                                     min="0"
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Num of rental days:</label>
                                                 <input
                                                     type="number"
                                                     placeholder="Number of Rental Days"
@@ -180,6 +196,7 @@ const CarList = ({ userId, userName }) => {
                                                     min="1"
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Paid amount:</label>
                                                 <input
                                                     type="number"
                                                     placeholder="Paid Amount"
@@ -187,25 +204,22 @@ const CarList = ({ userId, userName }) => {
                                                     onChange={(e) => handleTransactionChange(index, 'paidAmount', Number(e.target.value))}
                                                     className="border p-2 rounded"
                                                 />
-                                                <input
-                                                    type="date"
-                                                    value={transaction.data.transactionDate || ''}
-                                                    onChange={(e) => handleTransactionChange(index, 'transactionDate', e.target.value)}
-                                                    required
-                                                    className="border p-2 rounded"
-                                                />
+                                                
                                                 <div className="flex flex-col">
                                                     <label>Amount Due: {transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays || 0}</label>
                                                     <label style={{ color: (transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays - (transaction.data.paidAmount || 0)) > 0 ? 'red' : 'black' }}>
                                                         Balance Amount: {Math.max(transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays - (transaction.data.paidAmount || 0), 0)}
                                                     </label>
                                                 </div>
+                                                {error && <p className="text-red-500">{error}</p>}
+                                                {success && <p className="text-green-500">{success}</p>}
                                                 <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit Daily Report</button>
                                             </form>
                                         )}
 
                                         {transaction.type === 'expenses' && (
                                             <form onSubmit={(e) => { e.preventDefault(); handleAddReport(car.id, index); }} className="flex flex-col space-y-4">
+                                                <label>Driver Income:</label>
                                                 <input
                                                     type="number"
                                                     placeholder="Driver Income"
@@ -213,6 +227,7 @@ const CarList = ({ userId, userName }) => {
                                                     onChange={(e) => handleTransactionChange(index, 'driverIncome', Number(e.target.value))}
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Car Expense:</label>
                                                 <input
                                                     type="number"
                                                     placeholder="Car Expense"
@@ -220,24 +235,29 @@ const CarList = ({ userId, userName }) => {
                                                     onChange={(e) => handleTransactionChange(index, 'carExpense', Number(e.target.value))}
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Expense Description:</label>
                                                 <textarea
                                                     placeholder="Expense Description"
                                                     value={transaction.data.expenseDescription || ''}
                                                     onChange={(e) => handleTransactionChange(index, 'expenseDescription', e.target.value)}
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Comments:</label>
                                                 <textarea
                                                     placeholder="Comments"
                                                     value={transaction.data.comments || ''}
                                                     onChange={(e) => handleTransactionChange(index, 'comments', e.target.value)}
                                                     className="border p-2 rounded"
                                                 />
+                                                <label>Transaction date:</label>
                                                 <input
                                                     type="date"
                                                     value={transaction.data.transactionDate || ''}
                                                     onChange={(e) => handleTransactionChange(index, 'transactionDate', e.target.value)}
                                                     className="border p-2 rounded"
                                                 />
+                                                {error && <p className="text-red-500">{error}</p>}
+                                                {success && <p className="text-green-500">{success}</p>}
                                                 <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit Expense Report</button>
                                             </form>
                                         )}

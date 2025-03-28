@@ -1,4 +1,4 @@
-// src/app/components/DailyReports.jsx
+// src/app/components/AllDailyReports.jsx
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -49,17 +49,37 @@ const AllDailyReports = ({ carId, userId }) => {
                                 <th className="border border-gray-300 p-2">Number of Rental Days</th>
                                 <th className="border border-gray-300 p-2">Paid Amount</th>
                                 <th className="border border-gray-300 p-2">Balance Amount</th>
+                                <th className="border border-gray-300 p-2">Driver Income</th>
+                                <th className="border border-gray-300 p-2">Car Expenses</th>
+                                <th className="border border-gray-300 p-2">Expenses Description</th>
+                                <th className="border border-gray-300 p-2">Comments</th>
+                                <th className="border border-gray-300 p-2">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {reports.map(report => (
                                 <tr key={report.id}>
-                                    <td className="border border-gray-300 p-2">{report.transaction_date}</td>
-                                    <td className="border border-gray-300 p-2">{report.destination}</td>
-                                    <td className="border border-gray-300 p-2">{report.rental_rate_amount}</td>
-                                    <td className="border border-gray-300 p-2">{report.number_of_rental_days}</td>
-                                    <td className="border border-gray-300 p-2">{report.paid_amount}</td>
-                                    <td className="border border-gray-300 p-2">{report.balance_amount}</td>
+                                    <td className="border border-gray-300 p-2">{report.transaction_date || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.destination || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.rental_rate_amount || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.number_of_rental_days || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.paid_amount || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.balance_amount || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.driver_income || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.car_expense || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.expense_description || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.comments || 'N/A'}</td>
+
+                                    <td className="border border-gray-300 p-2">
+                                        <a
+                                            href={`/dashboard/${userId}/edit-report?reportId=${report.id}&type=${report.driver_income ? 'expenses' : 'revenue'}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="bg-yellow-500 text-white p-1 rounded"
+                                        >
+                                            Edit
+                                        </a>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

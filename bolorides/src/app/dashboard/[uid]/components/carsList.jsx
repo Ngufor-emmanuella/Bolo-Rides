@@ -56,10 +56,12 @@ const CarList = ({ userId, userName }) => {
             <h1 className="text-2xl font-bold mb-4">Cars Owned by {userName}</h1>
             {cars.length > 0 ? (
                 cars.map(car => (
+                    
                     <CarCard
                         key={car.id}
                         car={car}
-                        userId={userId}
+                        userId={userId} 
+                        userName={userName} // Pass userName here
                         activeCarId={activeCarId}
                         setActiveCarId={setActiveCarId}
                         showReports={showReports}
@@ -70,6 +72,7 @@ const CarList = ({ userId, userName }) => {
                         handleTransactionChange={handleTransactionChange}
                         handleRemoveTransaction={handleRemoveTransaction}
                     />
+
                 ))
             ) : (
                 <p className="text-gray-500">No cars found.</p>

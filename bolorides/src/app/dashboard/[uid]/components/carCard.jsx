@@ -4,7 +4,7 @@ import TransactionForm from './TransactionForm';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '@/app/firebase'; 
 
-const CarCard = ({ car, userId, activeCarId, setActiveCarId }) => {
+const CarCard = ({ car, userId, userName, activeCarId, setActiveCarId }) => {
     const [showReports, setShowReports] = useState(false);
     const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
 
@@ -47,16 +47,24 @@ const CarCard = ({ car, userId, activeCarId, setActiveCarId }) => {
         setTransactions(newTransactions);
     };
 
-    const handleAddReport = async (transaction, index) => {
+    const handleAddReport = async (transaction, index, carId, carName) => {
+        // Ensure userName is used here
         const reportData = {
             ...transaction.data,
             type: transaction.type,
-            userId: userId,
+            userId,
+            userName, // Use userName passed as a prop
+            carId,
+            carName,
             createdAt: new Date(),
         };
 
-        await addDoc(collection(db, 'DailyReports'), reportData);
-        resetTransactionData(index); // Reset transaction data after successful submission
+        try {
+            await addDoc(collection(db, 'DailyReports'), reportData);
+            resetTransactionData(index); // Reset transaction data after successful submission
+        } catch (error) {
+            console.error('Error adding report:', error.message);
+        }
     };
 
     return (
@@ -82,7 +90,7 @@ const CarCard = ({ car, userId, activeCarId, setActiveCarId }) => {
             {activeCarId === car.id && !showReports && (
                 <TransactionForm 
                     transactions={transactions} 
-                    handleAddReport={handleAddReport} 
+                    handleAddReport={(transaction, index) => handleAddReport(transaction, index, car.id, car.carName)} 
                     handleTransactionChange={handleTransactionChange} 
                     handleRemoveTransaction={handleRemoveTransaction} 
                     handleAddTransaction={handleAddTransaction} 

@@ -1,7 +1,6 @@
-// src/app/components/AllDailyReports.jsx
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 
 const AllDailyReports = ({ carId, userId }) => {
     const [reports, setReports] = useState([]);
@@ -12,15 +11,28 @@ const AllDailyReports = ({ carId, userId }) => {
         const fetchReports = async () => {
             setLoading(true);
             try {
+                console.log("Fetching reports for Car ID:", carId, "User ID:", userId);
+                
                 const reportQuery = query(
                     collection(db, 'DailyReports'),
                     where('carId', '==', carId),
-                    where('userId', '==', userId)
+                    where('userId', '==', userId),
+                    orderBy('transactionDate', 'desc') // Ensure your Firestore documents have a 'transactionDate' field
                 );
+                
                 const reportSnapshot = await getDocs(reportQuery);
+                
+                // Check if any reports were fetched
+                if (reportSnapshot.empty) {
+                    console.log("No reports found for this car and user.");
+                } else {
+                    console.log("Reports fetched:", reportSnapshot.docs.length);
+                }
+
                 const reportList = reportSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setReports(reportList);
             } catch (error) {
+                console.error('Error fetching reports:', error);
                 setError('Error fetching reports: ' + error.message);
             } finally {
                 setLoading(false);
@@ -47,6 +59,7 @@ const AllDailyReports = ({ carId, userId }) => {
                                 <th className="border border-gray-300 p-2">Destination</th>
                                 <th className="border border-gray-300 p-2">Rental Rate Amount</th>
                                 <th className="border border-gray-300 p-2">Number of Rental Days</th>
+                                <th className="border border-gray-300 p-2">Amount Due</th>
                                 <th className="border border-gray-300 p-2">Paid Amount</th>
                                 <th className="border border-gray-300 p-2">Balance Amount</th>
                                 <th className="border border-gray-300 p-2">Driver Income</th>
@@ -59,20 +72,20 @@ const AllDailyReports = ({ carId, userId }) => {
                         <tbody>
                             {reports.map(report => (
                                 <tr key={report.id}>
-                                    <td className="border border-gray-300 p-2">{report.transaction_date || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.transactionDate || 'N/A'}</td>
                                     <td className="border border-gray-300 p-2">{report.destination || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.rental_rate_amount || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.number_of_rental_days || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.paid_amount || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.balance_amount || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.driver_income || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.car_expense || 'N/A'}</td>
-                                    <td className="border border-gray-300 p-2">{report.expense_description || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.rentalRateAmount || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.numberOfRentalDays || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.amountDue || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.paidAmount || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.balanceAmount || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.driverIncome || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.carExpense || 'N/A'}</td>
+                                    <td className="border border-gray-300 p-2">{report.expenseDescription || 'N/A'}</td>
                                     <td className="border border-gray-300 p-2">{report.comments || 'N/A'}</td>
-
                                     <td className="border border-gray-300 p-2">
                                         <a
-                                            href={`/dashboard/${userId}/edit-report?reportId=${report.id}&type=${report.driver_income ? 'expenses' : 'revenue'}`}
+                                            href={`/dashboard/${userId}/edit-report?reportId=${report.id}&type=${report.driverIncome ? 'expenses' : 'revenue'}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="bg-yellow-500 text-white p-1 rounded"

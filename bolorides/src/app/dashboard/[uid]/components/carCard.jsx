@@ -1,9 +1,64 @@
-// src/app/components/CarCard.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import AllDailyReports from './AllDailyReports';
 import TransactionForm from './TransactionForm';
+import { addDoc, collection } from 'firebase/firestore';
+import { db } from '@/app/firebase'; 
 
-const CarCard = ({ car, userId, onEditReport, activeCarId, setActiveCarId, showReports, setShowReports, transactions, handleAddReport, handleTransactionChange }) => {
+const CarCard = ({ car, userId, activeCarId, setActiveCarId }) => {
+    const [showReports, setShowReports] = useState(false);
+    const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
+
+    const handleTransactionChange = (index, field, value) => {
+        const newTransactions = [...transactions];
+        if (field === 'type') {
+            newTransactions[index].type = value;
+        } else {
+            newTransactions[index].data[field] = value;
+        }
+        setTransactions(newTransactions);
+    };
+
+    const handleRemoveTransaction = (index) => {
+        const newTransactions = transactions.filter((_, i) => i !== index);
+        setTransactions(newTransactions);
+    };
+
+    const handleAddTransaction = () => {
+        setTransactions([...transactions, { type: 'revenue', data: {} }]);
+    };
+
+    const resetTransactionData = (index) => {
+        const resetData = {
+            transactionDate: '',
+            destination: '',
+            rentalRateAmount: '',
+            numberOfRentalDays: '',
+            paidAmount: '',
+            amountDue: 0,
+            balanceAmount: 0,
+            driverIncome: '',
+            carExpense: '',
+            expenseDescription: '',
+            comments: '',
+        };
+
+        const newTransactions = [...transactions];
+        newTransactions[index].data = resetData;
+        setTransactions(newTransactions);
+    };
+
+    const handleAddReport = async (transaction, index) => {
+        const reportData = {
+            ...transaction.data,
+            type: transaction.type,
+            userId: userId,
+            createdAt: new Date(),
+        };
+
+        await addDoc(collection(db, 'DailyReports'), reportData);
+        resetTransactionData(index); // Reset transaction data after successful submission
+    };
+
     return (
         <div key={car.id} className="mb-4 border p-4 rounded shadow">
             <h2 className="text-xl font-semibold">{car.carName}</h2>
@@ -16,20 +71,21 @@ const CarCard = ({ car, userId, onEditReport, activeCarId, setActiveCarId, showR
             <button
                 onClick={() => {
                     setShowReports(!showReports);
-                    setActiveCarId(car.id);
                 }}
                 className="bg-green-500 text-white p-2 rounded mb-2 ml-2"
             >
                 {showReports ? 'Hide All Transactions' : 'See All Transactions'}
             </button>
             {showReports && activeCarId === car.id && (
-                <AllDailyReports carId={car.id} userId={userId} onEdit={onEditReport} />
+                <AllDailyReports carId={car.id} userId={userId} />
             )}
             {activeCarId === car.id && !showReports && (
                 <TransactionForm 
                     transactions={transactions} 
                     handleAddReport={handleAddReport} 
-                    handleTransactionChange={handleTransactionChange} // Ensure this is included
+                    handleTransactionChange={handleTransactionChange} 
+                    handleRemoveTransaction={handleRemoveTransaction} 
+                    handleAddTransaction={handleAddTransaction} 
                 />
             )}
         </div>

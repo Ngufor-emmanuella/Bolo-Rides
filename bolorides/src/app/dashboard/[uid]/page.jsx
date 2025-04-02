@@ -122,6 +122,12 @@ const UserDashboard = () => {
                     onChange={(e) => setCarName(e.target.value)}
                     required
                     className="border p-2 mb-2"
+
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === 'Backspace') {
+                          e.preventDefault();
+                        }
+                      }}
                 />
                 <input
                     type="text"
@@ -130,6 +136,12 @@ const UserDashboard = () => {
                     onChange={(e) => setCarType(e.target.value)}
                     required
                     className="border p-2 mb-2"
+
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === 'Backspace') {
+                          e.preventDefault();
+                        }
+                      }}
                 />
                 <button type="submit" className="bg-blue-500 text-white p-2 rounded">Add Car</button>
             </form>

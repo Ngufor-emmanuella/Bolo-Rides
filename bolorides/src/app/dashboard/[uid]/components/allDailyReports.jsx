@@ -17,18 +17,16 @@ const AllDailyReports = ({ carId, userId }) => {
                     collection(db, 'DailyReports'),
                     where('carId', '==', carId),
                     where('userId', '==', userId),
-                    orderBy('transactionDate', 'desc') // Ensure your Firestore documents have a 'transactionDate' field
+                    orderBy('createdAt', 'desc') // Changed to 'createdAt' for proper ordering
                 );
                 
                 const reportSnapshot = await getDocs(reportQuery);
                 
-                // Check if any reports were fetched
-                if (reportSnapshot.empty) {
-                    console.log("No reports found for this car and user.");
-                } else {
-                    console.log("Reports fetched:", reportSnapshot.docs.length);
-                }
-
+                console.log("Reports fetched:", reportSnapshot.docs.length);
+                reportSnapshot.docs.forEach(doc => {
+                    console.log("Document data:", doc.data());
+                });
+        
                 const reportList = reportSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setReports(reportList);
             } catch (error) {
@@ -38,7 +36,7 @@ const AllDailyReports = ({ carId, userId }) => {
                 setLoading(false);
             }
         };
-
+       
         if (carId) {
             fetchReports();
         }
@@ -64,7 +62,7 @@ const AllDailyReports = ({ carId, userId }) => {
                                 <th className="border border-gray-300 p-2">Balance Amount</th>
                                 <th className="border border-gray-300 p-2">Driver Income</th>
                                 <th className="border border-gray-300 p-2">Car Expenses</th>
-                                <th className="border border-gray-300 p-2">Expenses Description</th>
+                                <th className="border border-gray-300 p-2">Expense Description</th>
                                 <th className="border border-gray-300 p-2">Comments</th>
                                 <th className="border border-gray-300 p-2">Actions</th>
                             </tr>

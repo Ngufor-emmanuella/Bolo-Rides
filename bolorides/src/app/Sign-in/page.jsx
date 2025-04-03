@@ -32,7 +32,9 @@ const SignIn = () => {
             const userDoc = await getDoc(doc(db, 'Users', user.uid));
             if (userDoc.exists()) {
                 const userData = userDoc.data();
-                if (userData.role === 'admin') {
+                const userRole = userData.role;
+
+                if (userRole === 'supreme' || userRole === 'admin') {
                     router.push('/admin'); 
                 } else {
                     router.push(`/dashboard/${user.uid}`); 

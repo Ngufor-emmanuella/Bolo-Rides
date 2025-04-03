@@ -9,12 +9,13 @@ const EditReport = () => {
     const router = useRouter();
     const [reportData, setReportData] = useState(null);
     const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState(''); // State for success message
+    const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
     const query = new URLSearchParams(window.location.search);
     const reportId = query.get('reportId');
     const reportType = query.get('type');
+    const userId = query.get('userId');
 
     useEffect(() => {
         const fetchReportData = async () => {
@@ -24,9 +25,11 @@ const EditReport = () => {
                     setReportData({ id: reportDoc.id, ...reportDoc.data() });
                 } else {
                     setError('Report not found.');
+                    setTimeout(() => setError(''), 3000);
                 }
             } catch (e) {
                 setError('Error fetching report data: ' + e.message);
+                setTimeout(() => setError(''), 3000);
             } finally {
                 setLoading(false);
             }
@@ -36,10 +39,15 @@ const EditReport = () => {
     }, [reportId]);
 
     const handleChange = (field, value) => {
+        if (value < 0) {
+            setError('Invalid value; negative numbers are not supported.');
+            setTimeout(() => setError(''), 3000);
+            return;
+        }
+
         setReportData(prev => {
             const updatedData = { ...prev, [field]: value };
             if (reportType === 'revenue') {
-                // Calculate Amount Due and Balance Amount for revenue
                 const amountDue = updatedData.rentalRateAmount * updatedData.numberOfRentalDays;
                 const balanceAmount = amountDue - (updatedData.paidAmount || 0);
                 return { ...updatedData, amountDue, balanceAmount };
@@ -52,17 +60,22 @@ const EditReport = () => {
         e.preventDefault();
         if (!reportData) return;
 
+        if (reportType === 'revenue' && reportData.paidAmount > reportData.amountDue) {
+            setError('Error: Paid amount exceeds amount due. Enter a valid amount.');
+            setTimeout(() => setError(''), 3000);
+            return;
+        }
+
         try {
             await updateDoc(doc(db, 'DailyReports', reportId), reportData);
-            setSuccessMessage('Edited successfully!'); // Set success message
+            setSuccessMessage('Edited successfully!');
             setTimeout(() => {
-                router.push(`/dashboard/${reportData.userId}`); // Redirect to the user's dashboard
-            }, 5000); // Redirect after 5 seconds
+                setSuccessMessage('');
+                router.push(`/dashboard/${userId}?carId=${reportData.carId}`);
+            }, 3000);
         } catch (e) {
             setError('Error updating report: ' + e.message);
-            setTimeout(() => {
-                setError(''); // Clear error after 5 seconds
-            }, 5000);
+            setTimeout(() => setError(''), 3000);
         }
     };
 
@@ -183,8 +196,8 @@ const EditReport = () => {
                 </>
             )}
             <button type="submit" className="bg-blue-500 text-white p-2 rounded">Update Report</button>
-            {successMessage && <p className="text-green-500 mt-4">{successMessage}</p>} {/* Display success message */}
-            {error && <p className="text-red-500 mt-4">{error}</p>} {/* Display error message */}
+            {successMessage && <p className="text-green-500 mt-4">{successMessage}</p>}
+            {error && <p className="text-red-500 mt-4">{error}</p>}
         </form>
     );
 };

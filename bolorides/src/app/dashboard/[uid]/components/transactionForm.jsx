@@ -6,9 +6,19 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
 
     const validateFields = (transaction) => {
         if (transaction.type === 'revenue') {
+            const { rentalRateAmount, numberOfRentalDays, paidAmount } = transaction.data;
+            const amountDue = rentalRateAmount * numberOfRentalDays;
+
+            if (paidAmount > amountDue) {
+                setMessage('Error: Paid amount exceeds amount due. Enter a valid amount.');
+                return false;
+            }
+            if (rentalRateAmount < 0 || numberOfRentalDays < 0 || paidAmount < 0) {
+                setMessage('Invalid value; negative numbers are not supported.');
+                return false;
+            }
             return transaction.data.transactionDate && transaction.data.destination && 
-                   transaction.data.rentalRateAmount && transaction.data.numberOfRentalDays && 
-                   transaction.data.paidAmount !== undefined;
+                   rentalRateAmount && numberOfRentalDays && paidAmount !== undefined;
         } else if (transaction.type === 'expenses') {
             return transaction.data.transactionDate && transaction.data.driverIncome &&
                    transaction.data.carExpense && transaction.data.expenseDescription && transaction.data.comments;
@@ -18,22 +28,36 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
 
     const handleSubmit = async (e, index) => {
         e.preventDefault();
-
+    
         if (isSubmitting) return;
-
+    
         const transaction = transactions[index];
-
+    
         if (!validateFields(transaction)) {
-            setMessage('Please enter all required fields.');
             setTimeout(() => setMessage(''), 5000);
             return;
         }
-
+    
         setIsSubmitting(true);
-
+        setMessage('Processing, please wait...');
+    
         try {
             await handleAddReport(transaction, index);
-            setMessage('Report added successfully!');
+            setMessage('Report submitted successfully!');
+    
+            // Reset the form fields after successful submission
+            const resetData = {
+                transactionDate: '',
+                destination: '',
+                rentalRateAmount: '',
+                numberOfRentalDays: '',
+                paidAmount: '',
+                driverIncome: '',
+                carExpense: '',
+                expenseDescription: '',
+                comments: '',
+            };
+            handleTransactionChange(index, 'data', resetData); 
         } catch (error) {
             setMessage('Error adding report: ' + error.message);
         } finally {
@@ -41,7 +65,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
             setTimeout(() => setMessage(''), 5000);
         }
     };
-
+    
     return (
         <div>
             {transactions.map((transaction, index) => (
@@ -94,7 +118,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                                     type="number"
                                     placeholder="Rental Rate Amount"
                                     value={transaction.data.rentalRateAmount || ''}
-                                    onChange={(e) => handleTransactionChange(index, 'rentalRateAmount', Number(e.target.value))}
+                                    onChange={(e) => handleTransactionChange(index, 'rentalRateAmount', Math.max(0, Number(e.target.value)))}
                                     required
                                     min="0"
                                     className="border p-2 rounded"
@@ -104,7 +128,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                                     type="number"
                                     placeholder="Number of Rental Days"
                                     value={transaction.data.numberOfRentalDays || ''}
-                                    onChange={(e) => handleTransactionChange(index, 'numberOfRentalDays', Number(e.target.value))}
+                                    onChange={(e) => handleTransactionChange(index, 'numberOfRentalDays', Math.max(1, Number(e.target.value)))}
                                     required
                                     min="1"
                                     className="border p-2 rounded"
@@ -114,7 +138,21 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                                     type="number"
                                     placeholder="Paid Amount"
                                     value={transaction.data.paidAmount || ''}
-                                    onChange={(e) => handleTransactionChange(index, 'paidAmount', Number(e.target.value))}
+                                    onChange={(e) => handleTransactionChange(index, 'paidAmount', Math.max(0, Number(e.target.value)))}
+                                    className="border p-2 rounded"
+                                />
+                                <label>Amount Due:</label>
+                                <input
+                                    type="number"
+                                    value={transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays || 0}
+                                    readOnly
+                                    className="border p-2 rounded"
+                                />
+                                <label>Balance Amount:</label>
+                                <input
+                                    type="number"
+                                    value={Math.max(0, (transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays || 0) - (transaction.data.paidAmount || 0))}
+                                    readOnly
                                     className="border p-2 rounded"
                                 />
                                 <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isSubmitting}>Submit Daily Report</button>
@@ -135,7 +173,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                                     type="number"
                                     placeholder="Driver Income"
                                     value={transaction.data.driverIncome || ''}
-                                    onChange={(e) => handleTransactionChange(index, 'driverIncome', Number(e.target.value))}
+                                    onChange={(e) => handleTransactionChange(index, 'driverIncome', Math.max(0, Number(e.target.value)))}
                                     className="border p-2 rounded"
                                     required
                                 />
@@ -144,7 +182,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                                     type="number"
                                     placeholder="Car Expense"
                                     value={transaction.data.carExpense || ''}
-                                    onChange={(e) => handleTransactionChange(index, 'carExpense', Number(e.target.value))}
+                                    onChange={(e) => handleTransactionChange(index, 'carExpense', Math.max(0, Number(e.target.value)))}
                                     className="border p-2 rounded"
                                     required
                                 />
@@ -168,7 +206,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                             </>
                         )}
                     </form>
-                    {message && <p className={`mt-2 ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+                    {message && <p className={`mt-2 ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500 font-bold'}`}>{message}</p>}
                 </div>
             ))}
             <button onClick={handleAddTransaction} className="bg-blue-500 text-white p-2 rounded mt-4">Add Another Transaction</button>

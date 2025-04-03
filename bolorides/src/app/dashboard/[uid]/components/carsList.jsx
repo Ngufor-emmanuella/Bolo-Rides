@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
 import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
-import CarCard from './carCard';
+import CarCard from './CarCard'; // Ensure the correct case for import
 
 const CarList = ({ userId, userName }) => {
     const [cars, setCars] = useState([]);
@@ -36,7 +36,6 @@ const CarList = ({ userId, userName }) => {
         }
         setTransactions(newTransactions);
     };
-    
 
     const handleAddTransaction = () => {
         setTransactions([...transactions, { type: 'revenue', data: {} }]);
@@ -47,8 +46,22 @@ const CarList = ({ userId, userName }) => {
         setTransactions(newTransactions);
     };
 
-    const handleAddReport = async (carId, index) => {
-        // ... existing code for adding a report
+    const handleAddReport = async (transaction, index) => {
+        try {
+            const reportData = {
+                ...transaction.data,
+                userId,
+                carId: activeCarId,
+                createdAt: new Date(),
+            };
+
+            await addDoc(collection(db, 'DailyReports'), reportData);
+            setTransactions(transactions.filter((_, i) => i !== index)); // Remove the submitted transaction
+            setSuccess('Report submitted successfully!'); // Show success message
+        } catch (error) {
+            console.error('Error adding report:', error.message);
+            setError('Error adding report: ' + error.message); // Show error message
+        }
     };
 
     return (
@@ -56,27 +69,27 @@ const CarList = ({ userId, userName }) => {
             <h1 className="text-2xl font-bold mb-4">Cars Owned by {userName}</h1>
             {cars.length > 0 ? (
                 cars.map(car => (
-                    
                     <CarCard
                         key={car.id}
                         car={car}
                         userId={userId} 
-                        userName={userName} // Pass userName here
+                        userName={userName} 
                         activeCarId={activeCarId}
                         setActiveCarId={setActiveCarId}
                         showReports={showReports}
                         setShowReports={setShowReports}
                         transactions={transactions}
                         handleAddReport={handleAddReport}
-                        handleAddTransaction={handleAddTransaction} // Pass the function here
+                        handleAddTransaction={handleAddTransaction}
                         handleTransactionChange={handleTransactionChange}
                         handleRemoveTransaction={handleRemoveTransaction}
                     />
-
                 ))
             ) : (
                 <p className="text-gray-500">No cars found.</p>
             )}
+            {error && <p className="text-red-500">{error}</p>}
+            {success && <p className="text-green-500">{success}</p>}
         </div>
     );
 };

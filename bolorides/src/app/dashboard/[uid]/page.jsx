@@ -14,6 +14,7 @@ const UserDashboard = () => {
     const [carType, setCarType] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loadingMessage, setLoadingMessage] = useState('');
     const [user, setUser] = useState(null);
     const [userName, setUserName] = useState('');
     const [cars, setCars] = useState([]);
@@ -56,9 +57,19 @@ const UserDashboard = () => {
         e.preventDefault();
         setError('');
         setSuccess('');
+        setLoadingMessage('Adding car, hold on...');
 
         if (!carName || !carType) {
             setError('Please enter all fields.');
+            return;
+        }
+
+        // Check for duplicate car name
+        const existingCar = cars.find(car => car.carName.toLowerCase() === carName.toLowerCase());
+        if (existingCar) {
+            setError('Failed to add car, please choose another car name.');
+            setLoadingMessage('');
+            setTimeout(() => setError(''), 5000);
             return;
         }
 
@@ -72,7 +83,7 @@ const UserDashboard = () => {
             };
 
             await addDoc(collection(db, 'Cars'), carData);
-            setSuccess('Car added successfully!');
+            setSuccess(`${carName} added successfully!`);
             setCarName('');
             setCarType('');
             const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
@@ -81,7 +92,13 @@ const UserDashboard = () => {
             setCars(carList);
         } catch (error) {
             console.error('Error adding car:', error);
-            setError('Error: ' + error.message);
+            setError('Failed to add car name successfully.');
+        } finally {
+            setLoadingMessage('');
+            setTimeout(() => {
+                setSuccess('');
+                setError('');
+            }, 5000);
         }
     };
 
@@ -99,11 +116,11 @@ const UserDashboard = () => {
     const handleTransactionChange = (index, field, value) => {
         const updatedTransactions = [...transactions];
         if (field === 'type') {
-            updatedTransactions[index].type = value; // Update the transaction type
+            updatedTransactions[index].type = value; 
         } else {
-            updatedTransactions[index].data[field] = value; // Update other fields
+            updatedTransactions[index].data[field] = value; 
         }
-        setTransactions(updatedTransactions); // Trigger state update
+        setTransactions(updatedTransactions); 
     };
 
     const handleRemoveTransaction = (index) => {
@@ -113,6 +130,7 @@ const UserDashboard = () => {
 
     // Define the handleAddReport function
     const handleAddReport = async (transaction, index) => {
+        setLoadingMessage('Processing, please wait...');
         try {
             const reportData = {
                 ...transaction.data,
@@ -122,10 +140,17 @@ const UserDashboard = () => {
             };
 
             await addDoc(collection(db, 'DailyReports'), reportData);
-            setTransactions(transactions.filter((_, i) => i !== index)); // Remove the submitted transaction
+            setTransactions(transactions.filter((_, i) => i !== index)); 
+            setSuccess('Report submitted successfully!');
         } catch (error) {
             console.error('Error adding report:', error.message);
             setError('Error adding report: ' + error.message);
+        } finally {
+            setLoadingMessage('');
+            setTimeout(() => {
+                setSuccess('');
+                setError('');
+            }, 5000);
         }
     };
 
@@ -171,6 +196,9 @@ const UserDashboard = () => {
                             className="border p-2 mb-2 w-full"
                         />
                         <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
+                        {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
+                        {success && <p className="mt-2 text-green-500">{success}</p>}
+                        {error && <p className="mt-2 text-red-500">{error}</p>}
                     </form>
                 )}
             </aside>

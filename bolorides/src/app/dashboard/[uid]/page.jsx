@@ -5,25 +5,29 @@ import { db } from '@/app/firebase';
 import { collection, addDoc, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import CarList from './components/carsList';
+import TransactionForm from './components/TransactionForm'; 
+import AllDailyReports from './components/AllDailyReports'; 
 
 const UserDashboard = () => {
     const router = useRouter();
     const [carName, setCarName] = useState('');
     const [carType, setCarType] = useState('');
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(''); // New state for success message
+    const [success, setSuccess] = useState('');
     const [user, setUser] = useState(null);
     const [userName, setUserName] = useState('');
-   
+    const [cars, setCars] = useState([]);
+    const [activeCarId, setActiveCarId] = useState(null);
+    const [showAddCarForm, setShowAddCarForm] = useState(false);
+    const [showTransactionForm, setShowTransactionForm] = useState(false);
+    const [showDailyReports, setShowDailyReports] = useState(false);
+    const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
     const auth = getAuth();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
             if (authUser) {
                 setUser(authUser);
-                console.log("Authenticated User:", authUser);
-
                 try {
                     const userDoc = await getDoc(doc(db, 'Users', authUser.uid));
                     if (userDoc.exists()) {
@@ -32,6 +36,10 @@ const UserDashboard = () => {
                         console.warn("User document not found for UID:", authUser.uid);
                         setUserName(authUser.email);
                     }
+                    const carQuery = query(collection(db, 'Cars'), where('userId', '==', authUser.uid));
+                    const carSnapshot = await getDocs(carQuery);
+                    const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setCars(carList);
                 } catch (e) {
                     console.error("Error fetching user data:", e);
                     setError("Error fetching user data.");
@@ -47,36 +55,14 @@ const UserDashboard = () => {
     const handleAddCar = async (e) => {
         e.preventDefault();
         setError('');
-        setSuccess(''); 
+        setSuccess('');
 
         if (!carName || !carType) {
             setError('Please enter all fields.');
             return;
         }
 
-        if (!user) {
-            setError('Not authenticated. Please sign in.');
-            return;
-        }
-
-        if (!userName) {
-            setError("User name is still loading. Please wait.");
-            return;
-        }
-
         try {
-            const carQuery = query(
-                collection(db, 'Cars'),
-                where('userId', '==', user.uid),
-                where('carName', '==', carName)
-            );
-            const carSnapshot = await getDocs(carQuery);
-
-            if (!carSnapshot.empty) {
-                setError('Car name already exists. Please select another car name.');
-                return;
-            }
-
             const carData = {
                 userId: user.uid,
                 userName: userName,
@@ -85,77 +71,145 @@ const UserDashboard = () => {
                 created_at: new Date(),
             };
 
-            const reportData = {
-                userId: user.uid,
-                userName: userName,
-                carId: "",
-                carName,
-                created_at: new Date(),
-            };
-
-            console.log("Data being sent to Cars:", carData);
-            console.log("Data being sent to DailyReports (before car creation):", reportData);
-
-            const carDoc = await addDoc(collection(db, 'Cars'), carData);
-            reportData.carId = carDoc.id;
-
-            console.log("Data being sent to DailyReports (after car creation):", reportData);
-            await addDoc(collection(db, 'DailyReports'), reportData);
-
-            setSuccess('Car and Daily Report added successfully!');
+            await addDoc(collection(db, 'Cars'), carData);
+            setSuccess('Car added successfully!');
             setCarName('');
             setCarType('');
+            const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
+            const carSnapshot = await getDocs(carQuery);
+            const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setCars(carList);
         } catch (error) {
-            console.error('Error adding car or daily report:', error);
+            console.error('Error adding car:', error);
             setError('Error: ' + error.message);
         }
     };
 
+    const handleCarSelect = (car) => {
+        setActiveCarId(car.id);
+        setShowTransactionForm(false);
+        setShowDailyReports(false);
+        setTransactions([{ type: 'revenue', data: {} }]);
+    };
+
+    const handleAddTransaction = () => {
+        setTransactions([...transactions, { type: 'revenue', data: {} }]);
+    };
+
+    const handleTransactionChange = (index, field, value) => {
+        const updatedTransactions = [...transactions];
+        if (field === 'type') {
+            updatedTransactions[index].type = value; // Update the transaction type
+        } else {
+            updatedTransactions[index].data[field] = value; // Update other fields
+        }
+        setTransactions(updatedTransactions); // Trigger state update
+    };
+
+    const handleRemoveTransaction = (index) => {
+        const updatedTransactions = transactions.filter((_, i) => i !== index);
+        setTransactions(updatedTransactions);
+    };
+
+    // Define the handleAddReport function
+    const handleAddReport = async (transaction, index) => {
+        try {
+            const reportData = {
+                ...transaction.data,
+                userId: user.uid,
+                carId: activeCarId,
+                createdAt: new Date(),
+            };
+
+            await addDoc(collection(db, 'DailyReports'), reportData);
+            setTransactions(transactions.filter((_, i) => i !== index)); // Remove the submitted transaction
+        } catch (error) {
+            console.error('Error adding report:', error.message);
+            setError('Error adding report: ' + error.message);
+        }
+    };
+
     return (
-        <div>
-            <h1>Welcome, {userName || user?.email}!</h1>
-            <form onSubmit={handleAddCar}>
-                <input
-                    type="text"
-                    placeholder="Car Name"
-                    value={carName}
-                    onChange={(e) => setCarName(e.target.value)}
-                    required
-                    className="border p-2 mb-2"
+        <div className="flex">
+            {/* Aside Navigation */}
+            <aside className="w-1/4 p-4 bg-gray-100">
+                <h2 className="text-xl font-bold">My Cars</h2>
+                <ul>
+                    {cars.map(car => (
+                        <li key={car.id} className="my-2">
+                            <button
+                                className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2f] text-white' : 'bg-blue-500 text-white'}`}
+                                onClick={() => handleCarSelect(car)}
+                            >
+                                {car.carName}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+                <button
+                    onClick={() => setShowAddCarForm(!showAddCarForm)}
+                    className="mt-4 bg-green-500 text-white p-2 rounded"
+                >
+                    {showAddCarForm ? 'Cancel' : 'Add Car'}
+                </button>
+                {showAddCarForm && (
+                    <form onSubmit={handleAddCar} className="mt-2">
+                        <input
+                            type="text"
+                            placeholder="Car Name"
+                            value={carName}
+                            onChange={(e) => setCarName(e.target.value)}
+                            required
+                            className="border p-2 mb-2 w-full"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Car Type"
+                            value={carType}
+                            onChange={(e) => setCarType(e.target.value)}
+                            required
+                            className="border p-2 mb-2 w-full"
+                        />
+                        <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
+                    </form>
+                )}
+            </aside>
 
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === 'Backspace') {
-                          e.preventDefault();
-                        }
-                      }}
-                />
-                <input
-                    type="text"
-                    placeholder="Car Type"
-                    value={carType}
-                    onChange={(e) => setCarType(e.target.value)}
-                    required
-                    className="border p-2 mb-2"
+            {/* Main Content */}
+            <main className="flex-1 p-4">
+                <h1 className="text-2xl mb-4">Welcome, {userName || user?.email}!</h1>
 
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === 'Backspace') {
-                          e.preventDefault();
-                        }
-                      }}
-                />
-                <button type="submit" className="bg-blue-500 text-white p-2 rounded">Add Car</button>
-            </form>
-            {success && <p className="text-green-500 mt-2">{success}</p>}
-            {error && <p className="text-red-500 mt-2">{error}</p>}
+                {activeCarId && (
+                    <div>
+                        <h2 className="text-xl mb-4">Actions for Selected Car: {cars.find(car => car.id === activeCarId)?.carName}</h2>
+                        <button
+                            onClick={() => setShowTransactionForm(!showTransactionForm)}
+                            className="bg-blue-500 text-white p-2 rounded mr-2"
+                        >
+                            {showTransactionForm ? 'Hide Add Daily Report' : 'Add Daily Report'}
+                        </button>
+                        <button
+                            onClick={() => setShowDailyReports(!showDailyReports)}
+                            className="bg-green-500 text-white p-2 rounded"
+                        >
+                            {showDailyReports ? 'Hide All Transactions' : 'View All Transactions'}
+                        </button>
 
-            {/* display cars owned by a user */}
-            {user &&
-                <CarList userId={user.uid} userName={userName} />
-
-            }
-
-            {/* daily*/}
-
+                        {showTransactionForm && (
+                            <TransactionForm 
+                                transactions={transactions} 
+                                handleAddReport={handleAddReport} 
+                                handleTransactionChange={handleTransactionChange}
+                                handleRemoveTransaction={handleRemoveTransaction}
+                                handleAddTransaction={handleAddTransaction}
+                            />
+                        )}
+                        {showDailyReports && (
+                            <AllDailyReports carId={activeCarId} userId={user.uid} />
+                        )}
+                    </div>
+                )}
+            </main>
         </div>
     );
 };

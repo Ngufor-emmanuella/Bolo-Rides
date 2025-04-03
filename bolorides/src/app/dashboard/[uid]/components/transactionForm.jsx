@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 
-const TransactionForm = ({ transactions, handleAddReport, handleTransactionChange, handleRemoveTransaction, handleAddTransaction }) => {
-    const [message, setMessage] = useState(''); 
-    const [isSubmitting, setIsSubmitting] = useState(false); 
-
-    const calculateAmounts = (index, rentalRateAmount, numberOfRentalDays, paidAmount) => {
-        const amountDue = rentalRateAmount * numberOfRentalDays;
-        const balanceAmount = amountDue - paidAmount;
-
-        handleTransactionChange(index, 'amountDue', amountDue);
-        handleTransactionChange(index, 'balanceAmount', balanceAmount);
-    };
+const TransactionForm = ({ transactions = [], handleAddReport, handleTransactionChange, handleRemoveTransaction, handleAddTransaction }) => {
+    const [message, setMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const validateFields = (transaction) => {
         if (transaction.type === 'revenue') {
@@ -18,8 +10,8 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
                    transaction.data.rentalRateAmount && transaction.data.numberOfRentalDays && 
                    transaction.data.paidAmount !== undefined;
         } else if (transaction.type === 'expenses') {
-            return transaction.data.driverIncome && transaction.data.carExpense &&
-                   transaction.data.expenseDescription && transaction.data.comments;
+            return transaction.data.transactionDate && transaction.data.driverIncome &&
+                   transaction.data.carExpense && transaction.data.expenseDescription && transaction.data.comments;
         }
         return false;
     };
@@ -29,7 +21,7 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
 
         if (isSubmitting) return;
 
-        const transaction = transactions[index]; // Get the transaction for this index
+        const transaction = transactions[index];
 
         if (!validateFields(transaction)) {
             setMessage('Please enter all required fields.');
@@ -40,7 +32,7 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
         setIsSubmitting(true);
 
         try {
-            await handleAddReport(transaction, index); // Pass transaction and index here
+            await handleAddReport(transaction, index);
             setMessage('Report added successfully!');
         } catch (error) {
             setMessage('Error adding report: ' + error.message);
@@ -102,11 +94,7 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
                                     type="number"
                                     placeholder="Rental Rate Amount"
                                     value={transaction.data.rentalRateAmount || ''}
-                                    onChange={(e) => {
-                                        const rentalRateAmount = Number(e.target.value);
-                                        handleTransactionChange(index, 'rentalRateAmount', rentalRateAmount);
-                                        calculateAmounts(index, rentalRateAmount, transaction.data.numberOfRentalDays || 0, transaction.data.paidAmount || 0);
-                                    }}
+                                    onChange={(e) => handleTransactionChange(index, 'rentalRateAmount', Number(e.target.value))}
                                     required
                                     min="0"
                                     className="border p-2 rounded"
@@ -116,11 +104,7 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
                                     type="number"
                                     placeholder="Number of Rental Days"
                                     value={transaction.data.numberOfRentalDays || ''}
-                                    onChange={(e) => {
-                                        const numberOfRentalDays = Number(e.target.value);
-                                        handleTransactionChange(index, 'numberOfRentalDays', numberOfRentalDays);
-                                        calculateAmounts(index, transaction.data.rentalRateAmount || 0, numberOfRentalDays, transaction.data.paidAmount || 0);
-                                    }}
+                                    onChange={(e) => handleTransactionChange(index, 'numberOfRentalDays', Number(e.target.value))}
                                     required
                                     min="1"
                                     className="border p-2 rounded"
@@ -130,27 +114,7 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
                                     type="number"
                                     placeholder="Paid Amount"
                                     value={transaction.data.paidAmount || ''}
-                                    onChange={(e) => {
-                                        const paidAmount = Number(e.target.value);
-                                        handleTransactionChange(index, 'paidAmount', paidAmount);
-                                        calculateAmounts(index, transaction.data.rentalRateAmount || 0, transaction.data.numberOfRentalDays || 0, paidAmount);
-                                    }}
-                                    className="border p-2 rounded"
-                                />
-                                <label>Amount Due:</label>
-                                <input
-                                    type="number"
-                                    placeholder="Amount Due"
-                                    value={transaction.data.amountDue || (transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays) || 0}
-                                    readOnly
-                                    className="border p-2 rounded"
-                                />
-                                <label>Balance Amount:</label>
-                                <input
-                                    type="number"
-                                    placeholder="Balance Amount"
-                                    value={transaction.data.balanceAmount || (transaction.data.amountDue - transaction.data.paidAmount) || 0}
-                                    readOnly
+                                    onChange={(e) => handleTransactionChange(index, 'paidAmount', Number(e.target.value))}
                                     className="border p-2 rounded"
                                 />
                                 <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isSubmitting}>Submit Daily Report</button>
@@ -165,9 +129,7 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
                                     onChange={(e) => handleTransactionChange(index, 'transactionDate', e.target.value)}
                                     required
                                     className="border p-2 rounded"
-                                    
                                 />
-
                                 <label>Driver Income:</label>
                                 <input
                                     type="number"

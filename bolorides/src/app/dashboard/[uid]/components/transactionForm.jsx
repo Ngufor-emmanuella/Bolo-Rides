@@ -158,6 +158,16 @@ const TransactionForm = ({ transactions, handleAddReport, handleTransactionChang
                         )}
                         {transaction.type === 'expenses' && (
                             <>
+                                <label>Transaction Date:</label>
+                                <input
+                                    type="date"
+                                    value={transaction.data.transactionDate || ''}
+                                    onChange={(e) => handleTransactionChange(index, 'transactionDate', e.target.value)}
+                                    required
+                                    className="border p-2 rounded"
+                                    
+                                />
+
                                 <label>Driver Income:</label>
                                 <input
                                     type="number"

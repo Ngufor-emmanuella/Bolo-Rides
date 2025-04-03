@@ -42,8 +42,8 @@ const SignUpPage = () => {
             await setDoc(doc(db, 'Users', user.uid), {
                 name,
                 email,
-                created_at: new Date(), // Timestamp
-                role: 'user', // Role field
+                created_at: new Date(), 
+                role: 'user', 
             });
 
             // Redirect to the user's dashboard

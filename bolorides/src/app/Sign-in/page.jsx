@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/app/firebase';
+import { auth, db } from '@/app/firebase'; 
+import { doc, getDoc } from 'firebase/firestore';
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
@@ -27,14 +28,22 @@ const SignIn = () => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // Redirect to the user's dashboard on successful sign-in
-            router.push(`/dashboard/${user.uid}`);
-
+            // Fetch the user document to check the role
+            const userDoc = await getDoc(doc(db, 'Users', user.uid));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.role === 'admin') {
+                    router.push('/admin'); 
+                } else {
+                    router.push(`/dashboard/${user.uid}`); 
+                } 
+            } else {
+                setErrorMessage('User not found. Please check your credentials.');
+            }
         } catch (signInError) {
             console.error('Error signing in:', signInError);
             setLoading(false); 
 
-           
             switch(signInError.code) {
                 case 'auth/user-not-found':
                     setErrorMessage('This account does not exist. Please create an account.');

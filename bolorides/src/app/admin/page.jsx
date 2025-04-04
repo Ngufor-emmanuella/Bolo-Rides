@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
+import UserCars from './UserCars';
+import UserReports from './UserReports';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -11,6 +13,13 @@ const AdminDashboard = () => {
     const [error, setError] = useState(null);
     const [message, setMessage] = useState('');
     const [currentUser, setCurrentUser] = useState(null);
+    const [expandedUserId, setExpandedUserId] = useState(null);
+    const [selectedCarId, setSelectedCarId] = useState(null);
+    const [selectedCarName, setSelectedCarName] = useState('');
+    const [selectedUserName, setSelectedUserName] = useState('');
+    const [showReports, setShowReports] = useState(false);
+    const [reports, setReports] = useState([]);
+
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
 
     useEffect(() => {
@@ -21,12 +30,9 @@ const AdminDashboard = () => {
                 const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 setUsers(usersList);
-
-                // Include supreme admin in the admin list and ensure they are at the top
                 const allAdmins = usersList.filter(user => user.role === 'admin' || user.role === 'supreme');
                 setAdmins(allAdmins.sort((a, b) => (a.role === 'supreme' ? -1 : 1)));
 
-                // Set current user details
                 const loggedInUser = usersList.find(user => user.id === supremeAdminId);
                 if (loggedInUser) {
                     setCurrentUser(loggedInUser);
@@ -42,82 +48,87 @@ const AdminDashboard = () => {
         fetchUsers();
     }, []);
 
-    const toggleAdminRole = async (userId, isAdmin) => {
-        if (userId === supremeAdminId) {
-            setMessage('You cannot remove the supreme admin.');
-            return;
+    const handleUserClick = (userId) => {
+        setExpandedUserId(expandedUserId === userId ? null : userId);
+        setSelectedCarId(null);
+        setShowReports(false); 
+        setReports([]);
+    };
+
+    const handleCarClick = (carId, carName, userName) => {
+        setSelectedCarId(carId);
+        setSelectedCarName(carName);
+        setSelectedUserName(userName);
+        setShowReports(false); 
+    };
+
+    const fetchReports = async (carId) => {
+        const reportsCollection = collection(db, 'DailyReports');
+        const reportsSnapshot = await getDocs(reportsCollection);
+        const userReports = reportsSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(report => report.carId === carId); 
+
+        setReports(userReports);
+    };
+
+    const handleViewReports = async () => {
+        if (selectedCarId) {
+            await fetchReports(selectedCarId);
+            setShowReports(prev => !prev); 
         }
-
-        setMessage(`Processing...`);
-
-        const userRef = doc(db, 'Users', userId);
-        try {
-            await updateDoc(userRef, {
-                role: isAdmin ? 'user' : 'admin' 
-            });
-
-            // Find the user whose role was changed
-            const updatedUser = users.find(user => user.id === userId);
-            const userName = updatedUser ? updatedUser.name : 'User';
-
-            // Update local state for users and admins
-            setUsers(prevUsers => 
-                prevUsers.map(user => 
-                    user.id === userId ? { ...user, role: isAdmin ? 'user' : 'admin' } : user
-                )
-            );
-
-            // Update admins state
-            setAdmins(prevAdmins => prevAdmins.filter(admin => admin.id !== userId));
-
-            const action = isAdmin ? 'removed as admin' : 'added as admin';
-            setMessage(`Successfully ${action} ${userName}`);
-        } catch (error) {
-            setMessage(`Failed to ${isAdmin ? 'remove' : 'add'} the user as admin.`);
-        }
-
-        setTimeout(() => {
-            setMessage('');
-        }, 5000);
     };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
     return (
-        <div>
-            <h1 className="text-2xl mb-4">Admin Dashboard</h1>
-            {currentUser && <h2 className="text-xl mb-4">Welcome, {currentUser.name}!</h2>} 
-            
-            <h3 className="text-xl mb-2">List of All Admins</h3>
-            {admins.length > 0 ? (
-                admins.map(admin => (
-                    <div key={admin.id} className="mb-4 p-4 border rounded">
-                        <h2 className="text-xl">{admin.name} ({admin.email})</h2>
-                        {admin.role !== 'supreme' && (
-                            <button onClick={() => toggleAdminRole(admin.id, true)} className="text-red-500">Remove Admin</button>
+        <div className="flex">
+            <aside className={`transition-all duration-300 ${showReports ? 'w-1/5' : 'w-1/4'} bg-gray-200 p-4`}>
+                <h1 className="text-2xl mb-4">Dashboard</h1>
+                <h3 className="text-xl mb-2">Admins</h3>
+                {admins.map(admin => (
+                    <div key={admin.id} className="mb-2">
+                        <span>{admin.name} ({admin.email})</span>
+                    </div>
+                ))}
+                
+                <h3 className="text-xl mb-2">Users</h3>
+                {users.map(user => (
+                    <div key={user.id} className="mb-2">
+                        <button onClick={() => handleUserClick(user.id)} className="w-full text-left">
+                            {user.name} ({user.email})
+                        </button>
+                        {expandedUserId === user.id && (
+                            <UserCars 
+                                userId={user.id} 
+                                onCarClick={(carId, carName) => handleCarClick(carId, carName, user.name)} 
+                                activeCarId={selectedCarId} 
+                            />
                         )}
                     </div>
-                ))
-            ) : (
-                <p>No admins found.</p>
-            )}
+                ))}
+            </aside>
 
-            <h3 className="text-xl mb-2">List of All Users</h3>
-            {users.length > 0 ? (
-                users.map(user => (
-                    <div key={user.id} className="mb-4 p-4 border rounded">
-                        <h2 className="text-xl">{user.name} ({user.email})</h2>
-                        {user.role !== 'admin' && user.id !== supremeAdminId && (
-                            <button onClick={() => toggleAdminRole(user.id, false)} className="text-green-500">Make Admin</button>
-                        )}
+            <main className="flex-1 p-4">
+                <h1 className="text-2xl mb-4">Admin Dashboard</h1>
+                {currentUser && <h2 className="text-xl mb-4">Welcome, {currentUser.name}!</h2>}
+                
+                {selectedCarId && (
+                    <div>
+                        <h2 className="text-xl mb-4">Actions for Selected Car: {selectedUserName} ; {selectedCarName}</h2>
+                        <button
+                            onClick={handleViewReports}
+                            className="bg-green-500 text-white p-2 rounded"
+                        >
+                            {showReports ? 'Hide All Transactions' : 'View All Transactions'}
+                        </button>
+                        {showReports && <UserReports reports={reports} />}
                     </div>
-                ))
-            ) : (
-                <p>No users found.</p>
-            )}
+                )}
 
-            {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}
+                {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}
+            </main>
         </div>
     );
 };

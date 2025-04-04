@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import UserReports from './userReports'; 
 
-const UserCars = ({ userId }) => {
+const UserCars = ({ userId, onCarClick, activeCarId }) => {
     const [cars, setCars] = useState([]);
 
     useEffect(() => {
@@ -12,7 +11,7 @@ const UserCars = ({ userId }) => {
             const carsSnapshot = await getDocs(carsCollection);
             const userCars = carsSnapshot.docs
                 .map(doc => ({ id: doc.id, ...doc.data() }))
-                .filter(car => car.userId === userId); // Filter cars by userId
+                .filter(car => car.userId === userId);
             setCars(userCars);
         };
 
@@ -20,18 +19,22 @@ const UserCars = ({ userId }) => {
     }, [userId]);
 
     return (
-        <div>
+        <ul className="ml-4 admin-cars"> 
             {cars.length > 0 ? (
                 cars.map(car => (
-                    <div key={car.id} className="ml-4">
-                        <h3>{car.carName}</h3>
-                        <UserReports carId={car.id} /> {/* Render UserReports for each car */}
-                    </div>
+                    <li key={car.id} className="my-2">
+                        <button
+                            className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2f] text-white' : 'bg-blue-500 text-white'}`}
+                            onClick={() => onCarClick(car.id, car.carName)} 
+                        >
+                            {car.carName}
+                        </button>
+                    </li>
                 ))
             ) : (
                 <p>No cars found for this user.</p>
             )}
-        </div>
+        </ul>
     );
 };
 

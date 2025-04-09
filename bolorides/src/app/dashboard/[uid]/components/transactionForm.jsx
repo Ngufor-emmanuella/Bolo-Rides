@@ -44,7 +44,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
         try {
             await handleAddReport(transaction, index);
             setMessage('Report submitted successfully!');
-    
+
             // Reset the form fields after successful submission
             const resetData = {
                 transactionDate: '',
@@ -67,9 +67,11 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
     };
     
     return (
-        <div>
+        <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto">
             {transactions.map((transaction, index) => (
-                <div key={index} className="mb-4">
+                <div key={index} className="mb-4 w-full">
+                    
+                    <br></br>
                     <div className="flex items-center mb-4">
                         <label className="mr-4">
                             <input
@@ -93,7 +95,7 @@ const TransactionForm = ({ transactions = [], handleAddReport, handleTransaction
                             Remove
                         </button>
                     </div>
-                    <form onSubmit={(e) => handleSubmit(e, index)} className="flex flex-col space-y-4">
+                    <form onSubmit={(e) => handleSubmit(e, index)} className="flex flex-col space-y-4 w-full md:w-3/4 lg:w-7/10 mx-auto">
                         {transaction.type === 'revenue' && (
                             <>
                                 <label>Transaction Date:</label>

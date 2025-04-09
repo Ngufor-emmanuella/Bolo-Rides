@@ -20,8 +20,9 @@ const AdminDashboard = () => {
     const [selectedUserName, setSelectedUserName] = useState('');
     const [showReports, setShowReports] = useState(false);
     const [reports, setReports] = useState([]);
-    const [viewingMonthlyReport, setViewingMonthlyReport] = useState(false); // State for monthly report visibility
+    const [viewingMonthlyReport, setViewingMonthlyReport] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [reportYear, setReportYear] = useState(new Date().getFullYear());
 
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
 
@@ -56,7 +57,7 @@ const AdminDashboard = () => {
         setSelectedCarId(null);
         setShowReports(false);
         setReports([]);
-        setViewingMonthlyReport(false); // Reset monthly report visibility
+        setViewingMonthlyReport(false);
     };
 
     const handleCarClick = (carId, carName, userName) => {
@@ -64,7 +65,7 @@ const AdminDashboard = () => {
         setSelectedCarName(carName);
         setSelectedUserName(userName);
         setShowReports(false);
-        setViewingMonthlyReport(false); // Reset monthly report visibility
+        setViewingMonthlyReport(false);
     };
 
     const fetchReports = async (carId) => {
@@ -88,6 +89,10 @@ const AdminDashboard = () => {
     const handleViewMonthlyReports = () => {
         setViewingMonthlyReport(prev => !prev); 
         setShowReports(false);
+    };
+
+    const handleYearChange = (event) => {
+        setReportYear(event.target.value);
     };
 
     const promoteUserToAdmin = async (userId) => {
@@ -141,7 +146,6 @@ const AdminDashboard = () => {
     return (
         <div className="flex">
             <aside className={`transition-all duration-300 ${showReports || viewingMonthlyReport ? 'w-1/5' : 'w-1/4'} bg-gray-200 p-4`}>
-                
                 {currentUser && <h1 className="text-xl mb-4">Welcome, {currentUser.name}!</h1>}
                 <h3 className="text-xl mb-2">List Of All Admins</h3>
                 {admins.map(admin => (
@@ -208,18 +212,27 @@ const AdminDashboard = () => {
                             {showReports ? 'Hide All Transactions' : 'View All Transactions'}
                         </button>
 
-                        <button
-                            onClick={handleViewMonthlyReports}
-                            className="bg-blue-500 text-white p-2 rounded"
-                        >
-                            {viewingMonthlyReport ? 'Hide Monthly Reports' : 'View Monthly Reports'}
-                        </button>
+                        <div className="flex items-center mb-4">
+                            <input
+                                type="number"
+                                value={reportYear}
+                                onChange={handleYearChange}
+                                placeholder="Enter Year (e.g., 2024)"
+                                className="border p-1 mr-2"
+                            />
+                            <button
+                                onClick={() => setViewingMonthlyReport(true)}
+                                className="bg-blue-500 text-white p-2 rounded"
+                            >
+                                Fetch Monthly Report
+                            </button>
+                        </div>
 
                         {/* Show UserReports if selected */}
                         {showReports && <UserReports reports={reports} />}
                         
                         {/* Show MonthlyReport if selected */}
-                        {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} />}
+                        {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} year={reportYear} />}
                     </div>
                 )}
 

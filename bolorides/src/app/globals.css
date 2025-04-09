@@ -23,13 +23,12 @@ body {
   padding: 0; 
   box-sizing: border-box; 
 }
-/* css code for home page */
 
+/* CSS code for home page */
 .logo-header {
   color: #9b2f2f;
   font-weight: 700;
   font-size: 16px;
-
 }
 
 .car-logo {
@@ -76,7 +75,6 @@ body {
   font-size: 18px;
   color: #9b2f2f;
   padding-bottom: 10px;
-
 }
 
 .card-title p {
@@ -104,7 +102,6 @@ body {
   background-color: #ffff;
   font-weight: 700;
   font-size: 16px;
- 
 }
 
 .sign-background {
@@ -127,7 +124,7 @@ body {
   background-color: #9b2f2f;
 }
 
-/* aside navbar */
+/* Aside navbar */
 .aside-background {
   background-color: #9b2f2f;
   border-radius: 10px;
@@ -145,6 +142,7 @@ body {
   font-weight: 500;
   font-size: 16px;
 }
+
 .aside-table {
   background-color: #ffffff;
   color: #9b2f2f;
@@ -155,9 +153,9 @@ body {
   font-size: 15px;
 }
 
-/* dashboard header */
+/* Dashboard header */
 .dashboard-head {
-  color:#9b2f2f;
+  color: #9b2f2f;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -188,7 +186,7 @@ body {
   font-size: 20px;
 }
 
-/* report table */
+/* Report table */
 .report-table {
   background-color: #9b2f2f;
   color: #ffffff;
@@ -196,7 +194,7 @@ body {
   font-size: 16px;
 }
 
-.remove-btn, .add-btn{
+.remove-btn, .add-btn {
   background-color: #9b2f2f;
   font-weight: 700;
   font-size: 12px;
@@ -209,4 +207,23 @@ body {
 
 .admin-cars {
   list-style-type: none;
+}
+
+/* Styles for mobile screens */
+/* Media queries for responsive design */
+@media (max-width: 640px) {
+  .accounts {
+    font-size: 8px;
+    width: 24%;
+    margin-right: 4%;
+  }
+
+  .report-box {
+    width: 70%; 
+  }
+
+  .dashboard-btn {
+    width: 100%; 
+    margin-left: 0;
+  }
 }

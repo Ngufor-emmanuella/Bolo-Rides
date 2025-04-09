@@ -83,10 +83,11 @@ const EditReport = () => {
 
     return (
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Edit {reportType === 'revenue' ? 'Revenue' : 'Expense'} Report</h2>
+            <h2 className="text-xl font-semibold mb-4  text-[#9b2f2f] text-center">Edit {reportType === 'revenue' ? 'Revenue' : 'Expense'} Report</h2>
+            <br></br>
             {reportType === 'revenue' && (
                 <>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Transaction Date:</label>
                         <input
                             type="date"
@@ -96,7 +97,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Destination:</label>
                         <input
                             type="text"
@@ -106,7 +107,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Rental Rate Amount:</label>
                         <input
                             type="number"
@@ -116,7 +117,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Number of Rental Days:</label>
                         <input
                             type="number"
@@ -126,7 +127,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Paid Amount:</label>
                         <input
                             type="number"
@@ -135,7 +136,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Amount Due:</label>
                         <input
                             type="number"
@@ -144,7 +145,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Balance Amount:</label>
                         <input
                             type="number"
@@ -157,7 +158,7 @@ const EditReport = () => {
             )}
             {reportType === 'expenses' && (
                 <>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Driver Income:</label>
                         <input
                             type="number"
@@ -167,7 +168,7 @@ const EditReport = () => {
                             required
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Car Expense:</label>
                         <input
                             type="number"
@@ -177,7 +178,7 @@ const EditReport = () => {
                             required
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Expense Description:</label>
                         <textarea
                             value={reportData.expenseDescription || ''}
@@ -185,7 +186,7 @@ const EditReport = () => {
                             className="border border-gray-300 p-2 rounded w-full"
                         />
                     </div>
-                    <div>
+                    <div className="w-11/12 md:w-85% mx-auto"> {/* Width adjustment */}
                         <label className="block">Comments:</label>
                         <textarea
                             value={reportData.comments || ''}
@@ -195,7 +196,14 @@ const EditReport = () => {
                     </div>
                 </>
             )}
-            <button type="submit" className="bg-blue-500 text-white p-2 rounded">Update Report</button>
+            <div className="flex justify-center">
+                <button 
+                    type="submit" 
+                    className="bg-[#9b2f2f] text-white p-2 rounded w-1/2 md:w-auto"
+                >
+                    Update Report
+                </button>
+            </div>
             {successMessage && <p className="text-green-500 mt-4">{successMessage}</p>}
             {error && <p className="text-red-500 mt-4">{error}</p>}
         </form>

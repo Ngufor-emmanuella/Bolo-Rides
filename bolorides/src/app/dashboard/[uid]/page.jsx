@@ -23,6 +23,7 @@ const UserDashboard = () => {
     const [showTransactionForm, setShowTransactionForm] = useState(false);
     const [showDailyReports, setShowDailyReports] = useState(false);
     const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
+    const [sidebarOpen, setSidebarOpen] = useState(false); // State for sidebar visibility
     const auth = getAuth();
 
     useEffect(() => {
@@ -64,7 +65,6 @@ const UserDashboard = () => {
             return;
         }
 
-        // Check for duplicate car name
         const existingCar = cars.find(car => car.carName.toLowerCase() === carName.toLowerCase());
         if (existingCar) {
             setError('Failed to add car, please choose another car name.');
@@ -107,6 +107,7 @@ const UserDashboard = () => {
         setShowTransactionForm(false);
         setShowDailyReports(false);
         setTransactions([{ type: 'revenue', data: {} }]);
+        setSidebarOpen(false); // Close sidebar when a car is selected
     };
 
     const handleAddTransaction = () => {
@@ -128,7 +129,6 @@ const UserDashboard = () => {
         setTransactions(updatedTransactions);
     };
 
-    // Define the handleAddReport function
     const handleAddReport = async (transaction, index) => {
         setLoadingMessage('Processing, please wait...');
         try {
@@ -155,9 +155,19 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="flex">
+        <div className="flex flex-col">
+            <header className="flex justify-between items-center p-4">
+                <h1 className="text-2xl">Welcome, {userName || user?.email}!</h1>
+                <button 
+                    className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                    {sidebarOpen ? 'X' : '☰'}
+                </button>
+            </header>
+
             {/* Aside Navigation */}
-            <aside className="w-1/4 p-4 bg-gray-100">
+            <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-full md:h-full`}>
                 <h2 className="text-xl font-bold">My Cars</h2>
                 <ul>
                     {cars.map(car => (
@@ -205,8 +215,6 @@ const UserDashboard = () => {
 
             {/* Main Content */}
             <main className="flex-1 p-4">
-                <h1 className="text-2xl mb-4">Welcome, {userName || user?.email}!</h1>
-
                 {activeCarId && (
                     <div>
                         <h2 className="text-xl mb-4">Actions for Selected Car: {cars.find(car => car.id === activeCarId)?.carName}</h2>
@@ -216,6 +224,7 @@ const UserDashboard = () => {
                         >
                             {showTransactionForm ? 'Hide Add Daily Report' : 'Add Daily Report'}
                         </button>
+
                         <button
                             onClick={() => setShowDailyReports(!showDailyReports)}
                             className="bg-green-500 text-white p-2 rounded"
@@ -223,6 +232,8 @@ const UserDashboard = () => {
                             {showDailyReports ? 'Hide All Transactions' : 'View All Transactions'}
                         </button>
 
+                        <br></br>
+                       
                         {showTransactionForm && (
                             <TransactionForm 
                                 transactions={transactions} 

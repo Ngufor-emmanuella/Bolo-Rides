@@ -155,25 +155,27 @@ const UserDashboard = () => {
     };
 
     return (
-        <div className="flex flex-col">
-            <header className="flex justify-between items-center p-4">
-                <h1 className="text-2xl">Welcome, {userName || user?.email}!</h1>
+        <div >
+            <header className="flex justify-center items-center p-4">
+                <h1 className="text-2xl text-center">Welcome, {userName || user?.email}!</h1>
                 <button 
-                    className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
+                    className="md:hidden p-2 text-white bg-blue-500 rounded z-50 ml-4"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                 >
                     {sidebarOpen ? 'X' : '☰'}
                 </button>
             </header>
 
+            <div className="flex flex-col md:flex-row">
+
             {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-full md:h-full`}>
+            <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4 md:h-full`}>
                 <h2 className="text-xl font-bold">My Cars</h2>
                 <ul>
                     {cars.map(car => (
                         <li key={car.id} className="my-2">
                             <button
-                                className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2f] text-white' : 'bg-blue-500 text-white'}`}
+                                className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2b] text-white' : 'bg-blue-500 text-white'}`}
                                 onClick={() => handleCarSelect(car)}
                             >
                                 {car.carName}
@@ -214,7 +216,7 @@ const UserDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-4">
+            <main className="flex-1 p-4 md:pl-4">
                 {activeCarId && (
                     <div>
                         <h2 className="text-xl mb-4">Actions for Selected Car: {cars.find(car => car.id === activeCarId)?.carName}</h2>
@@ -232,8 +234,6 @@ const UserDashboard = () => {
                             {showDailyReports ? 'Hide All Transactions' : 'View All Transactions'}
                         </button>
 
-                        <br></br>
-                       
                         {showTransactionForm && (
                             <TransactionForm 
                                 transactions={transactions} 
@@ -249,6 +249,7 @@ const UserDashboard = () => {
                     </div>
                 )}
             </main>
+            </div>
         </div>
     );
 };

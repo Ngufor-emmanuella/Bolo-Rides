@@ -19,12 +19,12 @@ const UserCars = ({ userId, onCarClick, activeCarId }) => {
     }, [userId]);
 
     return (
-        <ul className="ml-4 admin-cars"> 
+        <ul className="ml-4 admin-cars space-y-2">
             {cars.length > 0 ? (
                 cars.map(car => (
-                    <li key={car.id} className="my-2">
+                    <li key={car.id}>
                         <button
-                            className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2f] text-white' : 'bg-blue-500 text-white'}`}
+                            className={`text-left w-full p-2 rounded transition-colors duration-300 ${activeCarId === car.id ? 'bg-[#9b2f2f] text-white' : 'bg-blue-500 text-white'}`}
                             onClick={() => onCarClick(car.id, car.carName)} 
                         >
                             {car.carName}
@@ -32,7 +32,7 @@ const UserCars = ({ userId, onCarClick, activeCarId }) => {
                     </li>
                 ))
             ) : (
-                <p>No cars found for this user.</p>
+                <p className="text-center text-gray-500">No cars found for this user.</p>
             )}
         </ul>
     );

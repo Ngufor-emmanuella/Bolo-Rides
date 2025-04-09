@@ -23,6 +23,7 @@ const AdminDashboard = () => {
     const [viewingMonthlyReport, setViewingMonthlyReport] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
+    const [sidebarOpen, setSidebarOpen] = useState(false); // State for sidebar visibility
 
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
 
@@ -144,8 +145,10 @@ const AdminDashboard = () => {
     if (error) return <div>{error}</div>;
 
     return (
-        <div className="flex">
-            <aside className={`transition-all duration-300 ${showReports || viewingMonthlyReport ? 'w-1/5' : 'w-1/4'} bg-gray-200 p-4`}>
+        <div className="flex flex-col md:flex-row">
+           
+            {/* Aside Navigation */}
+            <aside className={`fixed inset-y-0 left-0 w-3/5 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
                 {currentUser && <h1 className="text-xl mb-4">Welcome, {currentUser.name}!</h1>}
                 <h3 className="text-xl mb-2">List Of All Admins</h3>
                 {admins.map(admin => (
@@ -199,33 +202,45 @@ const AdminDashboard = () => {
             </aside>
 
             <main className="flex-1 p-4">
-                <h1 className="text-2xl mb-4">Admin Dashboard</h1>
+            <div className="flex items-center justify-between mb-4">
+                <h1 className="text-2xl">Admin Dashboard</h1>
+                
+                <button 
+                    className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                    {sidebarOpen ? 'X' : '☰'}
+                </button>
+            </div>
+
+
                 
                 {selectedCarId && (
                     <div>
                         <h2 className="text-xl mb-4">Actions for Selected Car: {selectedUserName} ; {selectedCarName}</h2>
                         
-                        <button
-                            onClick={handleViewReports}
-                            className="bg-green-500 text-white p-2 rounded mr-2"
-                        >
-                            {showReports ? 'Hide All Transactions' : 'View All Transactions'}
-                        </button>
-
                         <div className="flex items-center mb-4">
+                            <button
+                                onClick={handleViewReports}
+                                className="bg-green-500 text-white p-2 rounded mr-2"
+                            >
+                                {showReports ? 'Hide All Transactions' : 'View All Transactions'}
+                            </button>
+
+                            <button
+                                onClick={() => setViewingMonthlyReport(true)}
+                                className="bg-blue-500 text-white p-2 rounded mr-2"
+                            >
+                                Fetch Monthly Report
+                            </button>
+
                             <input
                                 type="number"
                                 value={reportYear}
                                 onChange={handleYearChange}
                                 placeholder="Enter Year (e.g., 2024)"
-                                className="border p-1 mr-2"
+                                className="border p-1 ml-2"
                             />
-                            <button
-                                onClick={() => setViewingMonthlyReport(true)}
-                                className="bg-blue-500 text-white p-2 rounded"
-                            >
-                                Fetch Monthly Report
-                            </button>
                         </div>
 
                         {/* Show UserReports if selected */}

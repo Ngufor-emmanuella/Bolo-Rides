@@ -49,7 +49,7 @@ const AllDailyReports = ({ carId, userId }) => {
             {error && <p className="text-red-500">{error}</p>}
             {reports.length > 0 ? (
                 <div>
-                    <h3 className="text-lg font-semibold">Daily Reports</h3>
+                    <h3 className="text-lg font-semibold text-[#9b2f2f]">Daily Reports</h3>
                     <div className="overflow-x-auto">
                         <table className="min-w-full border-collapse border border-gray-200">
                             <thead>

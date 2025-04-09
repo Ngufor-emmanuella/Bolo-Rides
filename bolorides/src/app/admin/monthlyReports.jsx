@@ -82,47 +82,53 @@ const MonthlyReport = ({ carId, year }) => {
     const percentageOfGoal = (totalYearlyRentals / monthlyTargetGoal) * 100;
 
     return (
-        <div className="mt-4">
+        <div className="mt-4 p-4">
             <h3 className="text-lg font-semibold">Monthly Goals Reports for {year}</h3>
             <h5 className="mb-4">Monthly Target Goal: {monthlyTargetGoal.toLocaleString()} CFA</h5>
-            <table className="min-w-full border-collapse border border-gray-200">
-                <thead>
-                    <tr>
-                        <th className="border border-gray-300 p-2">Month Num</th> 
-                        <th className="border border-gray-300 p-2">Month</th>
-                        <th className="border border-gray-300 p-2">Total Amount Due</th>
-                        <th className="border border-gray-300 p-2">Total Management Fee</th>
-                        <th className="border border-gray-300 p-2">Total Driver Income</th>
-                        <th className="border border-gray-300 p-2">Total Car Expenses</th>
-                        <th className="border border-gray-300 p-2">Total Paid Amount</th>
-                        <th className="border border-gray-300 p-2">Balance Amount Due</th>
-                        <th className="border border-gray-300 p-2">Net Income</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {Array.from({ length: 12 }, (_, index) => {
-                        const monthNum = index + 1; 
-                        const monthKey = `${year}-${monthNum}`; 
-                        const data = monthlyData[monthKey] || {}; 
+            <div className="overflow-x-auto">
+                <table className="min-w-full border-collapse border border-gray-200">
+                    <thead>
+                        <tr>
+                            {[
+                                'Month Num',
+                                'Month',
+                                'Total Amount Due',
+                                'Total Management Fee',
+                                'Total Driver Income',
+                                'Total Car Expenses',
+                                'Total Paid Amount',
+                                'Balance Amount Due',
+                                'Net Income'
+                            ].map((header) => (
+                                <th key={header} className="border border-gray-300 p-2">{header}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Array.from({ length: 12 }, (_, index) => {
+                            const monthNum = index + 1; 
+                            const monthKey = `${year}-${monthNum}`; 
+                            const data = monthlyData[monthKey] || {}; 
 
-                        return (
-                            <tr key={monthNum}>
-                                <td className="border border-gray-300 p-2">{monthNum}</td> 
-                                <td className="border border-gray-300 p-2">
-                                    {new Date(year, index).toLocaleString('default', { month: 'long' })}
-                                </td>
-                                <td className="border border-gray-300 p-2">{(data.totalAmountDue || 0).toFixed(2)}</td>
-                                <td className="border border-gray-300 p-2">{(data.managementFee || 0).toFixed(2)}</td>
-                                <td className="border border-gray-300 p-2">{(data.totalDriverIncome || 0).toFixed(2)}</td>
-                                <td className="border border-gray-300 p-2">{(data.totalCarExpenses || 0).toFixed(2)}</td>
-                                <td className="border border-gray-300 p-2">{(data.totalPaidAmount || 0).toFixed(2)}</td>
-                                <td className="border border-gray-300 p-2">{(data.balanceAmountDue || 0).toFixed(2)}</td>
-                                <td className="border border-gray-300 p-2">{(data.netIncome || 0).toFixed(2)}</td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+                            return (
+                                <tr key={monthNum}>
+                                    <td className="border border-gray-300 p-2">{monthNum}</td> 
+                                    <td className="border border-gray-300 p-2">
+                                        {new Date(year, index).toLocaleString('default', { month: 'long' })}
+                                    </td>
+                                    <td className="border border-gray-300 p-2">{(data.totalAmountDue || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{(data.managementFee || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{(data.totalDriverIncome || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{(data.totalCarExpenses || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{(data.totalPaidAmount || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{(data.balanceAmountDue || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{(data.netIncome || 0).toFixed(2)}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
             <h3 className="text-lg font-semibold mt-4">Total Yearly Rentals: {totalYearlyRentals.toFixed(2)} CFA</h3>
             <h4 className="text-md">Percentage of Goal: {percentageOfGoal.toFixed(2)}%</h4>
         </div>

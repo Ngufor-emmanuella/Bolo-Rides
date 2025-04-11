@@ -2,6 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 
+// Helper function to format numbers with commas
+const formatNumber = (num) => {
+    if (num === null || num === undefined) return 'N/A';
+    const numberValue = Number(num); // Ensure the value is treated as a number
+    if (isNaN(numberValue)) return 'N/A'; // Handle NaN values
+    return numberValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
+
 const AllDailyReports = ({ carId, userId }) => {
     const [reports, setReports] = useState([]);
     const [error, setError] = useState('');
@@ -17,7 +25,7 @@ const AllDailyReports = ({ carId, userId }) => {
                     collection(db, 'DailyReports'),
                     where('carId', '==', carId),
                     where('userId', '==', userId),
-                    orderBy('createdAt', 'desc') // Changed to 'createdAt' for proper ordering
+                    orderBy('createdAt', 'desc')
                 );
                 
                 const reportSnapshot = await getDocs(reportQuery);
@@ -73,13 +81,13 @@ const AllDailyReports = ({ carId, userId }) => {
                                     <tr key={report.id}>
                                         <td className="border border-gray-300 p-2">{report.transactionDate || 'N/A'}</td>
                                         <td className="border border-gray-300 p-2">{report.destination || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.rentalRateAmount || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.numberOfRentalDays || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.amountDue || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.paidAmount || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.balanceAmount || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.driverIncome || 'N/A'}</td>
-                                        <td className="border border-gray-300 p-2">{report.carExpense || 'N/A'}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.rentalRateAmount)}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.numberOfRentalDays)}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.amountDue)}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.paidAmount)}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.balanceAmount)}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.driverIncome)}</td>
+                                        <td className="border border-gray-300 p-2">{formatNumber(report.carExpense)}</td>
                                         <td className="border border-gray-300 p-2">{report.expenseDescription || 'N/A'}</td>
                                         <td className="border border-gray-300 p-2">{report.comments || 'N/A'}</td>
                                         <td className="border border-gray-300 p-2">

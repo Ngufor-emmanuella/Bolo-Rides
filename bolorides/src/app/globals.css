@@ -17,12 +17,31 @@
   -webkit-text-fill-color: transparent;
 }
 
+
 body {
-  font-family: 'Inter', sans-serif; 
-  margin: 0; 
-  padding: 0; 
-  box-sizing: border-box; 
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
+
+
+
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
 
 /* CSS code for home page */
 .logo-header {
@@ -44,7 +63,7 @@ body {
 
 .overlay {
   background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
-  padding: 24px;
+  padding-top: 12%;
   text-align: center;
   justify-content: center;
 }
@@ -83,7 +102,7 @@ body {
   color: rgb(0, 5, 18);
 }
 
-.objectives h2 {
+.objectives h2,h4 {
   color: #9b2f2f;
 }
 
@@ -151,6 +170,11 @@ body {
 .aside-values {
   font-weight: 600;
   font-size: 15px;
+}
+
+.footer {
+  background-color: #9b2f2f;
+  color: #fff;
 }
 
 /* Dashboard header */

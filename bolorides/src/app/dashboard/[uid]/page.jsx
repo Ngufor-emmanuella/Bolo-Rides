@@ -5,8 +5,8 @@ import { db } from '@/app/firebase';
 import { collection, addDoc, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import TransactionForm from './components/TransactionForm'; 
-import AllDailyReports from './components/AllDailyReports'; 
+import TransactionForm from './components/TransactionForm';
+import AllDailyReports from './components/AllDailyReports';
 
 const UserDashboard = () => {
     const router = useRouter();
@@ -23,7 +23,7 @@ const UserDashboard = () => {
     const [showTransactionForm, setShowTransactionForm] = useState(false);
     const [showDailyReports, setShowDailyReports] = useState(false);
     const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
-    const [sidebarOpen, setSidebarOpen] = useState(false); // State for sidebar visibility
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const auth = getAuth();
 
     useEffect(() => {
@@ -107,7 +107,7 @@ const UserDashboard = () => {
         setShowTransactionForm(false);
         setShowDailyReports(false);
         setTransactions([{ type: 'revenue', data: {} }]);
-        setSidebarOpen(false); // Close sidebar when a car is selected
+        setSidebarOpen(false);
     };
 
     const handleAddTransaction = () => {
@@ -117,11 +117,11 @@ const UserDashboard = () => {
     const handleTransactionChange = (index, field, value) => {
         const updatedTransactions = [...transactions];
         if (field === 'type') {
-            updatedTransactions[index].type = value; 
+            updatedTransactions[index].type = value;
         } else {
-            updatedTransactions[index].data[field] = value; 
+            updatedTransactions[index].data[field] = value;
         }
-        setTransactions(updatedTransactions); 
+        setTransactions(updatedTransactions);
     };
 
     const handleRemoveTransaction = (index) => {
@@ -129,18 +129,10 @@ const UserDashboard = () => {
         setTransactions(updatedTransactions);
     };
 
-    const handleAddReport = async (transaction, index) => {
+    const handleAddReport = async (reportData) => {
         setLoadingMessage('Processing, please wait...');
         try {
-            const reportData = {
-                ...transaction.data,
-                userId: user.uid,
-                carId: activeCarId,
-                createdAt: new Date(),
-            };
-
             await addDoc(collection(db, 'DailyReports'), reportData);
-            setTransactions(transactions.filter((_, i) => i !== index)); 
             setSuccess('Report submitted successfully!');
         } catch (error) {
             console.error('Error adding report:', error.message);
@@ -155,10 +147,10 @@ const UserDashboard = () => {
     };
 
     return (
-        <div >
+        <div>
             <header className="flex justify-center items-center p-4">
                 <h1 className="text-2xl text-center">Welcome, {userName || user?.email}!</h1>
-                <button 
+                <button
                     className="md:hidden p-2 text-white bg-blue-500 rounded z-50 ml-4"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                 >
@@ -168,87 +160,92 @@ const UserDashboard = () => {
 
             <div className="flex flex-col md:flex-row">
 
-            {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4 md:h-full`}>
-                <h2 className="text-xl font-bold">My Cars</h2>
-                <ul>
-                    {cars.map(car => (
-                        <li key={car.id} className="my-2">
-                            <button
-                                className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2b] text-white' : 'bg-blue-500 text-white'}`}
-                                onClick={() => handleCarSelect(car)}
-                            >
-                                {car.carName}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-                <button
-                    onClick={() => setShowAddCarForm(!showAddCarForm)}
-                    className="mt-4 bg-green-500 text-white p-2 rounded"
-                >
-                    {showAddCarForm ? 'Cancel' : 'Add Car'}
-                </button>
-                {showAddCarForm && (
-                    <form onSubmit={handleAddCar} className="mt-2">
-                        <input
-                            type="text"
-                            placeholder="Car Name"
-                            value={carName}
-                            onChange={(e) => setCarName(e.target.value)}
-                            required
-                            className="border p-2 mb-2 w-full"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Car Type"
-                            value={carType}
-                            onChange={(e) => setCarType(e.target.value)}
-                            required
-                            className="border p-2 mb-2 w-full"
-                        />
-                        <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
-                        {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
-                        {success && <p className="mt-2 text-green-500">{success}</p>}
-                        {error && <p className="mt-2 text-red-500">{error}</p>}
-                    </form>
-                )}
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 p-4 md:pl-4">
-                {activeCarId && (
-                    <div>
-                        <h2 className="text-xl mb-4">Actions for Selected Car: {cars.find(car => car.id === activeCarId)?.carName}</h2>
-                        <button
-                            onClick={() => setShowTransactionForm(!showTransactionForm)}
-                            className="bg-blue-500 text-white p-2 rounded mr-2"
-                        >
-                            {showTransactionForm ? 'Hide Add Daily Report' : 'Add Daily Report'}
-                        </button>
-
-                        <button
-                            onClick={() => setShowDailyReports(!showDailyReports)}
-                            className="bg-green-500 text-white p-2 rounded"
-                        >
-                            {showDailyReports ? 'Hide All Transactions' : 'View All Transactions'}
-                        </button>
-
-                        {showTransactionForm && (
-                            <TransactionForm 
-                                transactions={transactions} 
-                                handleAddReport={handleAddReport} 
-                                handleTransactionChange={handleTransactionChange}
-                                handleRemoveTransaction={handleRemoveTransaction}
-                                handleAddTransaction={handleAddTransaction}
+                {/* Aside Navigation */}
+                <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4 md:h-full`}>
+                    <h2 className="text-xl font-bold">My Cars</h2>
+                    <ul>
+                        {cars.map(car => (
+                            <li key={car.id} className="my-2">
+                                <button
+                                    className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2b] text-white' : 'bg-blue-500 text-white'}`}
+                                    onClick={() => handleCarSelect(car)}
+                                >
+                                    {car.carName}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                    <button
+                        onClick={() => setShowAddCarForm(!showAddCarForm)}
+                        className="mt-4 bg-green-500 text-white p-2 rounded"
+                    >
+                        {showAddCarForm ? 'Cancel' : 'Add Car'}
+                    </button>
+                    {showAddCarForm && (
+                        <form onSubmit={handleAddCar} className="mt-2">
+                            <input
+                                type="text"
+                                placeholder="Car Name"
+                                value={carName}
+                                onChange={(e) => setCarName(e.target.value)}
+                                required
+                                className="border p-2 mb-2 w-full"
                             />
-                        )}
-                        {showDailyReports && (
-                            <AllDailyReports carId={activeCarId} userId={user.uid} />
-                        )}
-                    </div>
-                )}
-            </main>
+                            <input
+                                type="text"
+                                placeholder="Car Type"
+                                value={carType}
+                                onChange={(e) => setCarType(e.target.value)}
+                                required
+                                className="border p-2 mb-2 w-full"
+                            />
+
+                            <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
+                            {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
+                            {success && <p className="mt-2 text-green-500">{success}</p>}
+                            {error && <p className="mt-2 text-red-500">{error}</p>}
+                        </form>
+                    )}
+                </aside>
+
+                {/* Main Content */}
+                <main className="flex-1 p-4 md:pl-4">
+                    {activeCarId && (
+                        <div>
+                            <h2 className="text-xl mb-4">Actions for Selected Car: {cars.find(car => car.id === activeCarId)?.carName}</h2>
+                            <button
+                                onClick={() => setShowTransactionForm(!showTransactionForm)}
+                                className="bg-blue-500 text-white p-2 rounded mr-2"
+                            >
+                                {showTransactionForm ? 'Hide Transactions' : 'Add Transactions'}
+                            </button>
+
+                            <button
+                                onClick={() => setShowDailyReports(!showDailyReports)}
+                                className="bg-green-500 text-white p-2 rounded"
+                            >
+                                {showDailyReports ? 'Hide All Transactions' : 'Show All Transactions'}
+                            </button>
+
+                            {showTransactionForm && (
+                                <TransactionForm
+                                    transactions={transactions}
+                                    handleAddReport={handleAddReport}
+                                    handleTransactionChange={handleTransactionChange}
+                                    handleRemoveTransaction={handleRemoveTransaction}
+                                    handleAddTransaction={handleAddTransaction}
+                                    carId={activeCarId}
+                                    carName={cars.find(car => car.id === activeCarId)?.carName}
+                                    userId={user.uid}
+                                    userName={userName}
+                                />
+                            )}
+                            {showDailyReports && (
+                                <AllDailyReports carId={activeCarId} userId={user.uid} />
+                            )}
+                        </div>
+                    )}
+                </main>
             </div>
         </div>
     );

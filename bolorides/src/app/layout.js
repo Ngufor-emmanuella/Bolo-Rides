@@ -17,9 +17,6 @@ export default function RootLayout({ children }) {
         <AuthProvider> 
           <Header />
           <main className="flex-1">{children}</main>
-          <footer className='p-4 sm:p-8'>
-            hi footer
-          </footer>
         </AuthProvider>
       </body>
     </html>

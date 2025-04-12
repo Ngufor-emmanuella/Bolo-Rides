@@ -242,6 +242,7 @@ const UserDashboard = () => {
                             )}
                             {showDailyReports && (
                                 <AllDailyReports carId={activeCarId} userId={user.uid} />
+                                
                             )}
                         </div>
                     )}

@@ -19,8 +19,6 @@ const AllDailyReports = ({ carId, userId }) => {
         const fetchReports = async () => {
             setLoading(true);
             try {
-                console.log("Fetching reports for Car ID:", carId, "User ID:", userId);
-                
                 const reportQuery = query(
                     collection(db, 'DailyReports'),
                     where('carId', '==', carId),
@@ -29,12 +27,6 @@ const AllDailyReports = ({ carId, userId }) => {
                 );
                 
                 const reportSnapshot = await getDocs(reportQuery);
-                
-                console.log("Reports fetched:", reportSnapshot.docs.length);
-                reportSnapshot.docs.forEach(doc => {
-                    console.log("Document data:", doc.data());
-                });
-        
                 const reportList = reportSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setReports(reportList);
             } catch (error) {
@@ -57,7 +49,18 @@ const AllDailyReports = ({ carId, userId }) => {
             {error && <p className="text-red-500">{error}</p>}
             {reports.length > 0 ? (
                 <div>
-                    <h3 className="text-lg font-semibold text-[#9b2f2f]">Daily Reports</h3>
+                    <h3 className="text-lg font-semibold text-[#9b2f2b]">Daily Reports</h3>
+                    {/* Display pending balance messages at the top */}
+                    {reports.map(report => {
+                        if (report.balanceAmount > 0 && report.paidAmount < report.amountDue) {
+                            return (
+                                <p key={report.id} className="text-red-500 mt-2">
+                                    Transaction done on {report.transactionDate}. A balance amount of {formatNumber(report.balanceAmount)} is still pending. Please edit the values...
+                                </p>
+                            );
+                        }
+                        return null;
+                    })}
                     <div className="overflow-x-auto">
                         <table className="min-w-full border-collapse border border-gray-200">
                             <thead>
@@ -104,7 +107,7 @@ const AllDailyReports = ({ carId, userId }) => {
                                 ))}
                             </tbody>
                         </table>
-                        <div className="h-2 bg-[#9b2f2f] rounded-b-md"></div> {/* Horizontal scrollbar indicator */}
+                        <div className="h-2 bg-[#9b2f2b] rounded-b-md"></div> {/* Horizontal scrollbar indicator */}
                     </div>
                 </div>
             ) : (

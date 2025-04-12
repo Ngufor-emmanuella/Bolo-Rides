@@ -24,7 +24,6 @@ const TransactionForm = ({
             setMessage('Transaction date is required.');
             return false;
         }
-
         if (transaction.type === 'revenue') {
             if (!transaction.data.destination) {
                 setMessage('Destination is required.');
@@ -36,6 +35,10 @@ const TransactionForm = ({
             }
             if (!transaction.data.numberOfRentalDays || transaction.data.numberOfRentalDays <= 0) {
                 setMessage('Number of Rental Days must be greater than 0.');
+                return false;
+            }
+            if (transaction.data.paidAmount > (transaction.data.rentalRateAmount * transaction.data.numberOfRentalDays)) {
+                setMessage('Paid amount exceeds amount due. Please enter a valid amount.');
                 return false;
             }
         } else if (transaction.type === 'expenses') {
@@ -57,7 +60,6 @@ const TransactionForm = ({
 
     const handleSubmit = async (e, index) => {
         e.preventDefault();
-
         if (isSubmitting) return;
 
         const transaction = transactions[index];
@@ -71,6 +73,14 @@ const TransactionForm = ({
         setMessage('Processing, please wait...');
 
         try {
+            // Calculate Amount Due and Balance Amount
+            const rentalRateAmount = transaction.data.rentalRateAmount || 0;
+            const numberOfRentalDays = transaction.data.numberOfRentalDays || 0;
+            const paidAmount = transaction.data.paidAmount || 0;
+
+            const amountDue = rentalRateAmount * numberOfRentalDays;
+            const balanceAmount = Math.max(0, amountDue - paidAmount);
+
             // Prepare the report data to be submitted
             const reportData = {
                 ...transaction.data,
@@ -78,13 +88,16 @@ const TransactionForm = ({
                 carName: carName,
                 userId: userId,
                 userName: userName,
+                amountDue: amountDue, // Include Amount Due
+                balanceAmount: balanceAmount, // Include Balance Amount
+                createdAt: new Date(), // Add timestamp
             };
 
             await handleAddReport(reportData);
             setMessage('Report submitted successfully!');
 
             // Reset the form fields after successful submission
-            const resetData = {
+            handleTransactionChange(index, 'data', {
                 transactionDate: '',
                 destination: '',
                 rentalRateAmount: '',
@@ -94,9 +107,7 @@ const TransactionForm = ({
                 carExpense: '',
                 expenseDescription: '',
                 comments: '',
-            };
-
-            handleTransactionChange(index, 'data', resetData);
+            });
         } catch (error) {
             setMessage('Error adding report: ' + error.message);
         } finally {
@@ -107,7 +118,7 @@ const TransactionForm = ({
 
     const handleNumberChange = (index, field, value) => {
         const cleanedValue = value.replace(/[^0-9]/g, ''); // Allow only digits
-        const numberValue = cleanedValue === '' ? '' : Math.max(0, Number(cleanedValue));
+        const numberValue = cleanedValue === '' ? '' : Math.max(0, Number(cleanedValue)); // Ensure non-negative
         handleTransactionChange(index, field, numberValue);
     };
 
@@ -115,10 +126,45 @@ const TransactionForm = ({
         handleTransactionChange(index, field, value);
     };
 
+    const handleTypeChange = (index, type) => {
+        handleTransactionChange(index, 'type', type);
+        handleTransactionChange(index, 'data', {
+            transactionDate: '',
+            destination: '',
+            rentalRateAmount: '',
+            numberOfRentalDays: '',
+            paidAmount: '',
+            driverIncome: '',
+            carExpense: '',
+            expenseDescription: '',
+            comments: '',
+        });
+    };
+
     return (
         <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto">
             {transactions.map((transaction, index) => (
                 <div key={index} className="mb-4 w-full">
+                    <div className="flex justify-center mb-4">
+                        <label>
+                            <input
+                                type="radio"
+                                name={`transactionType-${index}`}
+                                checked={transaction.type === 'revenue'}
+                                onChange={() => handleTypeChange(index, 'revenue')}
+                            />
+                            Revenue
+                        </label>
+                        <label className="ml-4">
+                            <input
+                                type="radio"
+                                name={`transactionType-${index}`}
+                                checked={transaction.type === 'expenses'}
+                                onChange={() => handleTypeChange(index, 'expenses')}
+                            />
+                            Expenses
+                        </label>
+                    </div>
                     <form onSubmit={(e) => handleSubmit(e, index)} className="flex flex-col space-y-4 w-full md:w-3/4 lg:w-7/10 mx-auto">
                         {transaction.type === 'revenue' && (
                             <>
@@ -227,13 +273,15 @@ const TransactionForm = ({
                                 />
                             </>
                         )}
-                        <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isSubmitting}>
-                            Submit
-                        </button>
+                        <div className="flex justify-between">
+                            <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isSubmitting}>
+                                Submit
+                            </button>
+                            <button type="button" onClick={() => handleRemoveTransaction(index)} className="bg-red-500 text-white p-1 rounded">
+                                Remove Transaction
+                            </button>
+                        </div>
                     </form>
-                    <button type="button" onClick={() => handleRemoveTransaction(index)} className="mt-2 bg-red-500 text-white p-1 rounded">
-                        Remove Transaction
-                    </button>
                     {message && (
                         <p className={`mt-2 ${message.startsWith('Error') ? 'text-red-500' : 'text-green-500 font-bold'}`}>{message}</p>
                     )}
@@ -247,4 +295,3 @@ const TransactionForm = ({
 };
 
 export default TransactionForm;
-

@@ -5,7 +5,7 @@ import Link from 'next/link';
 const Sidebar = ({ onSelect, activeView }) => {
   return (
     <aside className="w-64 bg-gray-800 text-white min-h-screen p-4">
-      <h2 className="text-lg font-semibold mb-4">Navigation</h2>
+      <h2 className="text-lg text-[#9b2f2f] font-semibold mb-4">More Car Details...</h2>
       <ul>
         <li className={`mb-2 ${activeView === 'cars' ? 'font-bold' : ''}`}>
           <button className="text-gray-300 hover:text-white" onClick={() => onSelect('cars')}>View Cars</button>

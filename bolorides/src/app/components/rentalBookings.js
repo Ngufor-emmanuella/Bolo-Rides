@@ -87,6 +87,7 @@ const RentalBookings = () => {
                   <tr>
                     <th className="border border-gray-300 p-2 font-bold">Car Name</th>
                     <th className="border border-gray-300 p-2 font-bold">Car Type</th>
+                    <th className="border border-gray-300 p-2 font-bold">Destination</th>
                     <th className="border border-gray-300 p-2 font-bold">Start Date & Time</th>
                     <th className="border border-gray-300 p-2 font-bold">End Date & Time</th>
                   </tr>
@@ -99,6 +100,7 @@ const RentalBookings = () => {
                     <tr key={booking.id}>
                       <td className="border border-gray-300 p-2">{booking.carName}</td>
                       <td className="border border-gray-300 p-2">{booking.carType}</td>
+                      <td className="border border-gray-300 p-2">{booking.destination}</td>
                       <td className="border border-gray-300 p-2">{booking.startDate}  |  {booking.startTime}</td>
                       <td className="border border-gray-300 p-2">{booking.endDate}  |  {booking.endTime}</td>
                     </tr>

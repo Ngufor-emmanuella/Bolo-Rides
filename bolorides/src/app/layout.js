@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from './context/AuthContext';
 import Header from './components/Header';
+import TawkToWidget from './components/TawkToWidget';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
           <Header />
           <main className="flex-1">{children}</main>
         </AuthProvider>
+        <TawkToWidget />
       </body>
     </html>
   );

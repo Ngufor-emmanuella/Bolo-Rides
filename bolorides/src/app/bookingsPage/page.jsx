@@ -59,7 +59,7 @@ export default function BookingsPage() {
                 <p>Type: {car.carType}</p>
                 <p>Status: {car.status}</p>
                 <button 
-                  className="bg-blue-500 text-white p-2 rounded mt-2"
+                  className="bg-[#9b2f2f] text-white  text-white p-2 rounded mt-2"
                   onClick={() => openModal(car)}
                 >
                   Book Now

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mui/icons-material": "^7.0.2",
+    "@tawk.to/tawk-messenger-react": "^2.0.2",
     "axios": "^1.8.4",
     "browser-image-compression": "^2.0.2",
     "dashify": "^2.0.0",

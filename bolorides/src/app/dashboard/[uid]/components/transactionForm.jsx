@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
+
 
 // Helper function to format numbers with commas
 const formatNumber = (num) => {
@@ -18,6 +20,7 @@ const TransactionForm = ({
 }) => {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState('');
 
     const validateFields = (transaction) => {
         if (!transaction.data.transactionDate) {
@@ -66,6 +69,11 @@ const TransactionForm = ({
 
         if (!validateFields(transaction)) {
             setTimeout(() => setMessage(''), 5000);
+            return;
+        }
+
+        if (!captchaToken) {
+            setMessage('Please complete the reCAPTCHA.');
             return;
         }
 
@@ -273,6 +281,11 @@ const TransactionForm = ({
                                 />
                             </>
                         )}
+                        <ReCAPTCHA 
+                            sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY} 
+                            onChange={setCaptchaToken} 
+                            className="mb-4" 
+                        />
                         <div className="flex justify-between">
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isSubmitting}>
                                 Submit

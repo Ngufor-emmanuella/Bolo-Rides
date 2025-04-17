@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/app/firebase';
+import { auth } from './firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -91,7 +91,8 @@ export default function HomePage() {
         <h1 className="header-text text-white text-4xl font-bold text-center mb-6">Welcome to Bolo Rides!</h1>
         <h2 className="header-text text-white text-3xl font-bold text-center mb-6">BOLO CAR RENTALS</h2>
         <h5 className="header-add text-white text-2xl font-bold text-center mb-8">THE BEST CAR RENTALS IN CAMEROON!</h5>
-        <Link className="header-btn btn btn-white inline-block mb-8" href="/contact">Book Us Now!!</Link>
+        
+        <Link className="header-btn btn btn-white inline-block mb-8" href="/bookingsPage">Book Us Now!!</Link>
       </div>
 
       {/* First Group of Cards */}

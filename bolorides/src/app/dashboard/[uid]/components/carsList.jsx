@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/firebase';
 import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
-import CarCard from './CarCard'; // Ensure the correct case for import
+import CarCard from './CarCard';
 
 const CarList = ({ userId, userName }) => {
     const [cars, setCars] = useState([]);

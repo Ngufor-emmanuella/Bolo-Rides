@@ -1,12 +1,12 @@
 'use client'
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/app/firebase';
+import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from '../../public/assets/bolo-logo1.jpeg';
+import logo from '../../../public/assets/bolo-logo1.jpeg';
 
 export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);

@@ -3,9 +3,10 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from 'firebase/auth';
-import { auth } from '@/app/firebase';
-import { db } from '@/app/firebase'; // Import Firestore
+import { auth, db } from '../firebase';
 import { setDoc, doc } from 'firebase/firestore';
+
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 const SignUpPage = () => {
     const [name, setName] = useState('');
@@ -16,13 +17,33 @@ const SignUpPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
+    const { executeRecaptcha } = useGoogleReCaptcha();
+
     const handleSignUp = async (e) => {
         e.preventDefault();
         setError('');
 
+        
+
         // Check if password and confirm password match
         if (password !== confirmPassword) {
             setError('Passwords do not match. Please check the passwords.');
+            return;
+        }
+
+        if (!executeRecaptcha) {
+            setError('reCAPTCHA not ready. Please try again.');
+            return;
+          }
+      
+          const token = await executeRecaptcha('signup');
+          if (!token) {
+            setError('Please complete the reCAPTCHA.');
+            return;
+          }
+
+        if (!token) {
+            setError('Please complete the reCAPTCHA.');
             return;
         }
 
@@ -42,12 +63,12 @@ const SignUpPage = () => {
             await setDoc(doc(db, 'Users', user.uid), {
                 name,
                 email,
-                created_at: new Date(), 
-                role: 'user', 
+                created_at: new Date(),
+                role: 'user',
             });
 
             // Redirect to the user's dashboard
-            router.push(`/dashboard/${user.uid}`); // Redirecting to the dashboard using the User ID
+            router.push(`/dashboard/${user.uid}`);
         } catch (error) {
             console.error('Error signing up:', error);
             setError('Error signing up: ' + error.message);
@@ -60,7 +81,7 @@ const SignUpPage = () => {
                 <h1 className="text-2xl mb-5">Sign Up</h1>
                 {error && <p className="text-red-500">{error}</p>}
                 <form onSubmit={handleSignUp}>
-                    <label>UserName :</label>
+                    <label>UserName:</label>
                     <input
                         type="text"
                         placeholder="Name"
@@ -69,7 +90,7 @@ const SignUpPage = () => {
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
                         required
                     />
-                    <label>Email :</label>
+                    <label>Email:</label>
                     <input
                         type="email"
                         placeholder="Email"
@@ -78,7 +99,7 @@ const SignUpPage = () => {
                         className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
                         required
                     />
-                    <label>Password :</label>
+                    <label>Password:</label>
                     <div className="relative mb-4">
                         <input
                             type={showPassword ? 'text' : 'password'}
@@ -96,7 +117,7 @@ const SignUpPage = () => {
                             {showPassword ? 'Hide' : 'See'}
                         </button>
                     </div>
-                    <label>Repeat Password :</label>
+                    <label>Repeat Password:</label>
                     <div className="relative mb-4">
                         <input
                             type={showPassword ? 'text' : 'password'}

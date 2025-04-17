@@ -1,17 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db, storage } from '@/app/firebase';
 import { collection, addDoc, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import TransactionForm from './components/TransactionForm';
 import AllDailyReports from './components/AllDailyReports';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const UserDashboard = () => {
     const router = useRouter();
     const [carName, setCarName] = useState('');
     const [carType, setCarType] = useState('');
+    const [images, setImages] = useState([null, null, null]); // Three images for the car
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loadingMessage, setLoadingMessage] = useState('');
@@ -60,25 +62,36 @@ const UserDashboard = () => {
         setSuccess('');
         setLoadingMessage('Adding car, hold on...');
 
-        if (!carName || !carType) {
-            setError('Please enter all fields.');
+        // Check if all fields are filled
+        if (!carName || !carType || images.some(img => !img)) {
+            setError('Please fill all fields and upload three images.');
             return;
         }
-
-        const existingCar = cars.find(car => car.carName.toLowerCase() === carName.toLowerCase());
-        if (existingCar) {
-            setError('Failed to add car, please choose another car name.');
-            setLoadingMessage('');
-            setTimeout(() => setError(''), 5000);
-            return;
-        }
+    
 
         try {
+            if (!user) {
+                throw new Error("User is not authenticated.");
+            }
+    
+            // Upload images to Firebase Storage and get URLs
+            const imageUrls = await Promise.all(
+                images.map(async (image, index) => {
+                    if (!image) {
+                        throw new Error(`Image ${index + 1} is missing.`);
+                    }
+                    const storageRef = ref(storage, `car-images/${user.uid}/${Date.now()}-${image.name}`);
+                    await uploadBytes(storageRef, image);
+                    return getDownloadURL(storageRef);
+                })
+            );
+
             const carData = {
                 userId: user.uid,
                 userName: userName,
                 carName,
                 carType,
+                images: imageUrls, // Store image URLs
                 created_at: new Date(),
             };
 
@@ -86,13 +99,14 @@ const UserDashboard = () => {
             setSuccess(`${carName} added successfully!`);
             setCarName('');
             setCarType('');
+            setImages([null, null, null]); // Reset images
             const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
             const carSnapshot = await getDocs(carQuery);
             const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setCars(carList);
         } catch (error) {
             console.error('Error adding car:', error);
-            setError('Failed to add car name successfully.');
+            setError(`Failed to add car name successfully: ${error.message}`);
         } finally {
             setLoadingMessage('');
             setTimeout(() => {
@@ -100,6 +114,12 @@ const UserDashboard = () => {
                 setError('');
             }, 5000);
         }
+    };
+
+    const handleImageChange = (index, event) => {
+        const newImages = [...images];
+        newImages[index] = event.target.files[0]; // Save the selected file
+        setImages(newImages);
     };
 
     const handleCarSelect = (car) => {
@@ -199,7 +219,28 @@ const UserDashboard = () => {
                                 required
                                 className="border p-2 mb-2 w-full"
                             />
-
+                            {/* Image Uploads */}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(0, e)}
+                                required
+                                className="border p-2 mb-2 w-full"
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(1, e)}
+                                required
+                                className="border p-2 mb-2 w-full"
+                            />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleImageChange(2, e)}
+                                required
+                                className="border p-2 mb-2 w-full"
+                            />
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
                             {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
                             {success && <p className="mt-2 text-green-500">{success}</p>}
@@ -242,7 +283,6 @@ const UserDashboard = () => {
                             )}
                             {showDailyReports && (
                                 <AllDailyReports carId={activeCarId} userId={user.uid} />
-                                
                             )}
                         </div>
                     )}

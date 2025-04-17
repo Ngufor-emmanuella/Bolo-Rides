@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const MonthlyReport = ({ carId, year }) => {

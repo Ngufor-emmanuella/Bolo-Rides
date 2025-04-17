@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
 const UserCars = ({ userId, onCarClick, activeCarId }) => {

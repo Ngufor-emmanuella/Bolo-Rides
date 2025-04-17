@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AllDailyReports from './AllDailyReports';
 import TransactionForm from './TransactionForm';
 import { addDoc, collection } from 'firebase/firestore';
-import { db } from '@/app/firebase'; 
+import { db } from '../../../firebase'; 
 
 const CarCard = ({ car, userId, userName, activeCarId, setActiveCarId }) => {
     const [showReports, setShowReports] = useState(false);

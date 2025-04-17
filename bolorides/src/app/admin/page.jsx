@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db } from '../firebase';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import UserCars from './userCars';
 import UserReports from './userReports';
 import MonthlyReport from './monthlyReports'; 
+import ViewBookingHistory from './viewBookingHistory';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -23,7 +24,8 @@ const AdminDashboard = () => {
     const [viewingMonthlyReport, setViewingMonthlyReport] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
-    const [sidebarOpen, setSidebarOpen] = useState(false); // State for sidebar visibility
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [showBookingHistory, setShowBookingHistory] = useState(false); // New state for booking history
 
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
 
@@ -141,6 +143,10 @@ const AdminDashboard = () => {
         }
     };
 
+    const toggleBookingHistory = () => {
+        setShowBookingHistory(prev => !prev);
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
@@ -149,7 +155,7 @@ const AdminDashboard = () => {
            
             {/* Aside Navigation */}
             <aside className={`fixed inset-y-0 left-0 w-3/5 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
-                {currentUser && <h1 className="text-xl mb-4">Welcome, {currentUser.name}!</h1>}
+                {currentUser && <h1 className="text-xl  text-[#9b2f2f] mb-4">Welcome, {currentUser.name}!</h1>}
                 <h3 className="text-xl mb-2">List Of All Admins</h3>
                 {admins.map(admin => (
                     <div key={admin.id} className="mb-2">
@@ -160,6 +166,17 @@ const AdminDashboard = () => {
                 <br />
                 <hr />
                 <br />
+
+                 {/* Button to toggle booking history */}
+                 <button 
+                    onClick={toggleBookingHistory} 
+                    className="mt-4 bg-[#9b2f2f] text-white p-2 rounded w-full"
+                >
+                    {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
+                </button>
+
+                <br></br>
+                <br></br>
 
                 <h3 className="text-xl mb-2">List Of All Users</h3>
                 {users.map(user => (
@@ -174,11 +191,12 @@ const AdminDashboard = () => {
                             {user.role === 'user' && (
                                 <button 
                                     onClick={() => promoteUserToAdmin(user.id)} 
-                                    className="ml-2 bg-blue-500 text-white p-1 rounded"
+                                    className="ml-2  bg-[#9b2f2f] text-white p-1 rounded"
                                     disabled={processing}
                                 >
                                     Promote to Admin
                                 </button>
+                                
                             )}
                             {user.role === 'admin' && user.id !== supremeAdminId && (
                                 <button 
@@ -189,7 +207,9 @@ const AdminDashboard = () => {
                                     Remove Admin
                                 </button>
                             )}
+                              
                         </div>
+                        <br></br>
                         {expandedUserId === user.id && (
                             <UserCars 
                                 userId={user.id} 
@@ -199,59 +219,65 @@ const AdminDashboard = () => {
                         )}
                     </div>
                 ))}
+
+               
             </aside>
 
             <main className="flex-1 p-4">
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl">Admin Dashboard</h1>
-                
-                <button 
-                    className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                >
-                    {sidebarOpen ? 'X' : '☰'}
-                </button>
-            </div>
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-2xl  text-[#9b2f2f] ">Admin Dashboard</h1>
+                    
+                    <button 
+                        className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                    >
+                        {sidebarOpen ? 'X' : '☰'}
+                    </button>
+                </div>
 
+                {showBookingHistory ? (
+                    <ViewBookingHistory /> 
+                ) : (
+                    <>
+                        {selectedCarId && (
+                            <div>
+                                <h2 className="text-xl mb-4">Actions for Selected Car: {selectedUserName} ; {selectedCarName}</h2>
+                                
+                                <div className="flex items-center mb-4">
+                                    <button
+                                        onClick={handleViewReports}
+                                        className="bg-green-500 text-white p-2 rounded mr-2"
+                                    >
+                                        {showReports ? 'Hide All Transactions' : 'View All Transactions'}
+                                    </button>
 
-                
-                {selectedCarId && (
-                    <div>
-                        <h2 className="text-xl mb-4">Actions for Selected Car: {selectedUserName} ; {selectedCarName}</h2>
-                        
-                        <div className="flex items-center mb-4">
-                            <button
-                                onClick={handleViewReports}
-                                className="bg-green-500 text-white p-2 rounded mr-2"
-                            >
-                                {showReports ? 'Hide All Transactions' : 'View All Transactions'}
-                            </button>
+                                    <button
+                                        onClick={() => setViewingMonthlyReport(true)}
+                                        className=" bg-[#9b2f2f] text-white p-2 rounded mr-2"
+                                    >
+                                        Fetch Monthly Report
+                                    </button>
 
-                            <button
-                                onClick={() => setViewingMonthlyReport(true)}
-                                className="bg-blue-500 text-white p-2 rounded mr-2"
-                            >
-                                Fetch Monthly Report
-                            </button>
+                                    <input
+                                        type="number"
+                                        value={reportYear}
+                                        onChange={handleYearChange}
+                                        placeholder="Enter Year (e.g., 2024)"
+                                        className="border p-1 ml-2"
+                                    />
+                                </div>
 
-                            <input
-                                type="number"
-                                value={reportYear}
-                                onChange={handleYearChange}
-                                placeholder="Enter Year (e.g., 2024)"
-                                className="border p-1 ml-2"
-                            />
-                        </div>
+                                {/* Show UserReports if selected */}
+                                {showReports && <UserReports reports={reports} />}
+                                
+                                {/* Show MonthlyReport if selected */}
+                                {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} year={reportYear} />}
+                            </div>
+                        )}
 
-                        {/* Show UserReports if selected */}
-                        {showReports && <UserReports reports={reports} />}
-                        
-                        {/* Show MonthlyReport if selected */}
-                        {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} year={reportYear} />}
-                    </div>
+                        {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}
+                    </>
                 )}
-
-                {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}
             </main>
         </div>
     );

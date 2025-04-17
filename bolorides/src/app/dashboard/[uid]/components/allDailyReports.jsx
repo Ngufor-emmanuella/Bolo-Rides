@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db } from '../../../firebase';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 
 // Helper function to format numbers with commas

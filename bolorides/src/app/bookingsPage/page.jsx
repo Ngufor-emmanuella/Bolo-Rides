@@ -14,7 +14,7 @@ export default function BookingsPage() {
   const [error, setError] = useState('');
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeView, setActiveView] = useState('cars'); // Default view is cars
+  const [activeView, setActiveView] = useState('cars'); 
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -48,7 +48,7 @@ export default function BookingsPage() {
     <div className="flex">
       <Sidebar onSelect={setActiveView} activeView={activeView} />
       <main className="flex-1 p-4">
-        <h1 className="text-4xl font-bold mb-4">{activeView === 'cars' ? 'Available Cars' : activeView === 'bookings' ? 'Rental Bookings' : 'Rental Calendar'}</h1>
+        <h1 className="text-4xl text-[#9b2f2f] font-bold mb-4">{activeView === 'cars' ? 'Available Cars' : activeView === 'bookings' ? 'Rental Bookings' : 'Rental Calendar'}</h1>
         {error && <p className="text-red-500">{error}</p>}
 
         {activeView === 'cars' && (

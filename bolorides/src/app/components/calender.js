@@ -46,10 +46,12 @@ const Calendar = () => {
     const startDay = new Date(year, month, 1).getDay();
     const calendarDays = [];
 
+    // Add empty divs for days before the start of the month
     for (let i = 0; i < startDay; i++) {
       calendarDays.push(<div key={`empty-${i}`} className="border p-2"></div>);
     }
 
+    // Fill in the days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const booked = isBooked(date);
@@ -89,8 +91,9 @@ const Calendar = () => {
 
       if (hasUpcomingBookings) {
         upcomingMonths.push(
-          <div key={month} className="mt-4">
-            <h3 className="text-lg font-bold">Upcoming Rentals for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(year, month))}</h3>
+          <div key={month} className="mt-4"> 
+            <h2 className="text-xl text-[#9b2f2f] font-bold">Upcoming Rentals for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(year, month))}</h2>
+            <br></br>
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: daysInMonth }, (_, day) => {
                 const date = new Date(year, month, day + 1);
@@ -125,15 +128,26 @@ const Calendar = () => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">Rental Calendar for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate)}</h2>
+      <h2 className="text-2xl text-[#9b2f2f]  font-bold mb-2"> Bookings  for the month of  {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate)}</h2>
+      <br></br>
       {loading ? (
-        <p>Please hold on...</p>
+        <p className="text-lg">Please hold on...</p>
       ) : (
         <div>
           <div className="grid grid-cols-7 gap-1">
+            {/* Day names */}
+            <div className="text-center font-bold">Monday</div>
+            <div className="text-center font-bold">Tuesday</div>
+            <div className="text-center font-bold">Wednesday</div>
+            <div className="text-center font-bold">Thursday</div>
+            <div className="text-center font-bold">Friday</div>
+            <div className="text-center font-bold">Saturday</div>
+            <div className="text-center font-bold">Sunday</div>
             {renderCalendar()}
           </div>
+          <br></br>
           {renderUpcomingMonths()}
+          <br></br>
         </div>
       )}
     </div>

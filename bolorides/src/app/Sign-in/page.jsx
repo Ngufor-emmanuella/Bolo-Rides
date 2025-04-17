@@ -1,4 +1,3 @@
-// app/sign-in/page.js
 'use client';
 
 import React, { useState } from 'react';
@@ -6,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import RecaptchaClientProvider from '../components/RecaptchaClientProvider';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -16,8 +13,6 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const { executeRecaptcha } = useGoogleReCaptcha();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
@@ -25,19 +20,6 @@ const SignIn = () => {
 
     if (!email || !password) {
       setErrorMessage('Please enter both email and password.');
-      setLoading(false);
-      return;
-    }
-
-    if (!executeRecaptcha) {
-      setErrorMessage('reCAPTCHA not ready. Please try again.');
-      setLoading(false);
-      return;
-    }
-
-    const token = await executeRecaptcha('sign_in');
-    if (!token) {
-      setErrorMessage('Please complete the reCAPTCHA.');
       setLoading(false);
       return;
     }
@@ -79,45 +61,43 @@ const SignIn = () => {
   };
 
   return (
-    <RecaptchaClientProvider>
-      <div className="sign-background flex items-center justify-center min-h-screen">
-        <div className="signup p-10 rounded-lg shadow-xl w-96">
-          <h1 className="text-2xl mb-5">Sign In</h1>
-          <form onSubmit={handleSubmit}>
-            <label>Email:</label>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-white-700"
-              required
-            />
-            <label>Password:</label>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-white-700"
-              required
-            />
-            <button
-              type="submit"
-              className="submit-btn w-full p-3 rounded text-white"
-              disabled={loading}
-            >
-              {loading ? 'Signing In... Hold On' : 'Sign In'}
-            </button>
-          </form>
-          {errorMessage && (
-            <div className="bg-red-100 border border-red-400 text-red-700 font-bold px-4 py-3 rounded mt-4 relative" role="alert">
-              <span className="block sm:inline">{errorMessage} <a href="/Sign-up" className="text-gray-700 hover:underline">Create an account</a></span>
-            </div>
-          )}
-        </div>
+    <div className="sign-background flex items-center justify-center min-h-screen">
+      <div className="signup p-10 rounded-lg shadow-xl w-96">
+        <h1 className="text-2xl mb-5">Sign In</h1>
+        <form onSubmit={handleSubmit}>
+          <label>Email:</label>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+            required
+          />
+          <label>Password:</label>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
+            required
+          />
+          <button
+            type="submit"
+            className="submit-btn w-full p-3 rounded text-white"
+            disabled={loading}
+          >
+            {loading ? 'Signing In... Hold On' : 'Sign In'}
+          </button>
+        </form>
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 font-bold px-4 py-3 rounded mt-4 relative" role="alert">
+            <span className="block sm:inline">{errorMessage} <a href="/Sign-up" className="text-gray-700 hover:underline">Create an account</a></span>
+          </div>
+        )}
       </div>
-    </RecaptchaClientProvider>
+    </div>
   );
 };
 

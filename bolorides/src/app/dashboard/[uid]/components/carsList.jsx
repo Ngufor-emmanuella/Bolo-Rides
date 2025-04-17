@@ -1,6 +1,6 @@
 // src/app/components/CarList.jsx
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db } from '../../../firebase';
 import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
 import CarCard from './CarCard';
 

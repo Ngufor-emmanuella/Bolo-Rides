@@ -1,4 +1,3 @@
-// app/components/BookingModal.js
 'use client';
 
 import React, { useState } from 'react';
@@ -27,6 +26,7 @@ const BookingModal = ({ car, onClose }) => {
       const bookingData = {
         carId: car.id,
         carName: car.carName,
+        carType: car.carType,
         startDate,
         startTime,
         endDate,
@@ -67,8 +67,14 @@ const BookingModal = ({ car, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm z-50">
       <div className="modal-content bg-[#9b2f2f] p-6 rounded-lg w-11/12 max-w-lg overflow-y-auto" style={{ maxHeight: '80vh' }}>
-        <span className="close text-white cursor-pointer" onClick={onClose}>&times;</span>
-        <h2 className="text-white text-2xl mb-4">Book {car.carName}</h2>
+        <span 
+          className="close text-white cursor-pointer" 
+          onClick={onClose} 
+          style={{ fontSize: '2rem' }} // Increase the size to 2rem
+        >
+          &times;
+        </span>
+        <h2 className="text-white text-2xl mb-4">Rent {car.carName}</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="flex mb-4">
@@ -99,10 +105,9 @@ const BookingModal = ({ car, onClose }) => {
           <label className="text-white">Phone Number</label>
           <div className="flex mb-4">
             <select className="p-2 rounded-l bg-white" value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
+              <option value="+237">+237 (Cameroon)</option>
               <option value="+1">+1 (USA)</option>
               <option value="+44">+44 (UK)</option>
-              <option value="+91">+91 (India)</option>
-              <option value="+237">+237 (Cameroon)</option>
               <option value="+234">+234 (Nigeria)</option>
               <option value="+1">+1 (Canada)</option>
               <option value="">Custom Code</option>
@@ -116,18 +121,17 @@ const BookingModal = ({ car, onClose }) => {
 
           <label className="text-white">Email (optional)</label>
           <input type="email" placeholder="Email" className="mb-4 w-full p-2 rounded bg-white" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <br></br>
+          <br />
 
           {loadingMessage && <p className="text-yellow-200">{loadingMessage}</p>}
           {error && <p className="text-red-200">{error}</p>}
           {success && <h5 className="text-green-200">{success}</h5>}
-          <br></br>
+          <br />
           <button type="submit" className="w-full bg-white text-[#9b2f2f] p-2 rounded">Create Booking</button>
-          <br></br>
-          
+          <br />
         </form>
-        <br></br>
-        <br></br>       
+        <br />
+        <br />       
       </div>
     </div>
   );

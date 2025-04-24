@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db } from '@/app/firebase';
+import { db } from '../../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import ReCAPTCHA from 'react-google-recaptcha'; 
 
 // Helper function to format numbers with commas
 const formatNumber = (num) => {
@@ -16,6 +17,7 @@ const EditReport = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] = useState(true);
+    const [captchaToken, setCaptchaToken] = useState(''); // State for reCAPTCHA
 
     const query = new URLSearchParams(window.location.search);
     const reportId = query.get('reportId');
@@ -73,6 +75,11 @@ const EditReport = () => {
         if (reportType === 'revenue' && reportData.paidAmount > reportData.amountDue) {
             setError('Error: Paid amount exceeds amount due. Enter a valid amount.');
             setTimeout(() => setError(''), 3000);
+            return;
+        }
+
+        if (!captchaToken) { // Validate reCAPTCHA token
+            setError('Please complete the reCAPTCHA.');
             return;
         }
 
@@ -206,6 +213,11 @@ const EditReport = () => {
                     </div>
                 </>
             )}
+            <ReCAPTCHA 
+                sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY} 
+                onChange={setCaptchaToken} 
+                className="mb-4" 
+            />
             <div className="flex justify-center">
                 <button 
                     type="submit" 

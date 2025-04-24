@@ -1,4 +1,3 @@
-// app/bookingsPage.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -15,6 +14,7 @@ export default function BookingsPage() {
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeView, setActiveView] = useState('cars'); 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar visibility
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -44,11 +44,35 @@ export default function BookingsPage() {
     setSelectedCar(null);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleNavLinkClick = (view) => {
+    setActiveView(view);
+    setIsSidebarOpen(false); // Close the sidebar on nav link click
+  };
+
   return (
     <div className="flex">
-      <Sidebar onSelect={setActiveView} activeView={activeView} />
-      <main className="flex-1 p-4">
-        <h1 className="text-4xl text-[#9b2f2f] font-bold mb-4">{activeView === 'cars' ? 'Available Cars' : activeView === 'bookings' ? 'Rental Bookings' : 'Rental Calendar'}</h1>
+      <button 
+        className="md:hidden p-2 text-white bg-[#9b2f2f] rounded fixed z-10 top-5 left-2"
+        onClick={toggleSidebar}
+      >
+        {isSidebarOpen ? '✖' : '☰'}
+      </button>
+
+      <Sidebar 
+        onSelect={handleNavLinkClick} 
+        activeView={activeView} 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} // Pass the close function
+      />
+
+      <main className={`flex-1 p-4 ${isSidebarOpen ? 'ml-64' : ''}`}>
+        <h1 className="text-4xl text-[#9b2f2b] font-bold mb-4">
+          {activeView === 'cars' ? 'Available Cars' : activeView === 'bookings' ? 'Rental Bookings' : 'Rental Calendar'}
+        </h1>
         {error && <p className="text-red-500">{error}</p>}
 
         {activeView === 'cars' && (
@@ -59,7 +83,7 @@ export default function BookingsPage() {
                 <p>Type: {car.carType}</p>
                 <p>Status: {car.status}</p>
                 <button 
-                  className="bg-[#9b2f2f] text-white  text-white p-2 rounded mt-2"
+                  className="bg-[#9b2f2b] text-white p-2 rounded mt-2"
                   onClick={() => openModal(car)}
                 >
                   Book Now
@@ -70,9 +94,7 @@ export default function BookingsPage() {
         )}
 
         {activeView === 'bookings' && <RentalBookings />}
-
-        {activeView === 'calendar' && <Calendar />} {/* Display the calendar component */}
-
+        {activeView === 'calendar' && <Calendar />}
         {isModalOpen && <BookingModal car={selectedCar} onClose={closeModal} />}
       </main>
     </div>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 
-
 // Helper function to format numbers with commas
 const formatNumber = (num) => {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -99,6 +98,7 @@ const TransactionForm = ({
                 amountDue: amountDue, // Include Amount Due
                 balanceAmount: balanceAmount, // Include Balance Amount
                 createdAt: new Date(), // Add timestamp
+                captchaToken: captchaToken, // Include reCAPTCHA token
             };
 
             await handleAddReport(reportData);
@@ -121,6 +121,7 @@ const TransactionForm = ({
         } finally {
             setIsSubmitting(false);
             setTimeout(() => setMessage(''), 5000);
+            setCaptchaToken(''); // Reset the captcha token after submission
         }
     };
 

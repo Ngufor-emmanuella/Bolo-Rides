@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import ReCAPTCHA from 'react-google-recaptcha'; // Import ReCAPTCHA
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(''); // State for reCAPTCHA token
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -20,6 +22,12 @@ const SignIn = () => {
 
     if (!email || !password) {
       setErrorMessage('Please enter both email and password.');
+      setLoading(false);
+      return;
+    }
+
+    if (!captchaToken) { // Validate reCAPTCHA token
+      setErrorMessage('Please complete the reCAPTCHA.');
       setLoading(false);
       return;
     }
@@ -82,6 +90,11 @@ const SignIn = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full p-3 mb-4 bg-gray-700 rounded outline-none text-white placeholder-gray-500"
             required
+          />
+          <ReCAPTCHA 
+            sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY} 
+            onChange={setCaptchaToken} 
+            className="mb-4" 
           />
           <button
             type="submit"

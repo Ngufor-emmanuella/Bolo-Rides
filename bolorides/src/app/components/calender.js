@@ -1,4 +1,3 @@
-// app/components/Calendar.js
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -58,7 +57,7 @@ const Calendar = () => {
       const isPast = date < new Date();
       const className = booked.length > 0
         ? (isPast ? 'border p-2 bg-green-100' : 'border p-2 bg-green-600 text-white') // Current & future bookings
-        : (isPast ? 'border p-2' : 'border p-2 bg-green-200'); // Future months bookings
+        : (isPast ? 'border p-2' : 'border p-2 bg-green-200'); // Future bookings
 
       calendarDays.push(
         <div key={day} className={className}>
@@ -92,8 +91,10 @@ const Calendar = () => {
       if (hasUpcomingBookings) {
         upcomingMonths.push(
           <div key={month} className="mt-4"> 
-            <h2 className="text-xl text-[#9b2f2f] font-bold">Upcoming Rentals for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(year, month))}</h2>
-            <br></br>
+            <h2 className="text-xl text-[#9b2f2b] font-bold">
+              Upcoming Rentals for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(year, month))}
+            </h2>
+            <br />
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: daysInMonth }, (_, day) => {
                 const date = new Date(year, month, day + 1);
@@ -127,14 +128,15 @@ const Calendar = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl text-[#9b2f2f]  font-bold mb-2"> Bookings  for the month of  {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate)}</h2>
-      <br></br>
+    <div className="p-4">
+      <h2 className="text-2xl text-[#9b2f2b] font-bold mb-2">
+        Bookings for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate)}
+      </h2>
       {loading ? (
         <p className="text-lg">Please hold on...</p>
       ) : (
         <div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-1">
             {/* Day names */}
             <div className="text-center font-bold">Monday</div>
             <div className="text-center font-bold">Tuesday</div>
@@ -145,9 +147,9 @@ const Calendar = () => {
             <div className="text-center font-bold">Sunday</div>
             {renderCalendar()}
           </div>
-          <br></br>
+          <br />
           {renderUpcomingMonths()}
-          <br></br>
+          <br />
         </div>
       )}
     </div>

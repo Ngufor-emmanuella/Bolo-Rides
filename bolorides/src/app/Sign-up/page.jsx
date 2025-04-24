@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { setDoc, doc } from 'firebase/firestore';
+import ReCAPTCHA from 'react-google-recaptcha'; // Import ReCAPTCHA
 
 const SignUpPage = () => {
   const [name, setName] = useState('');
@@ -13,6 +14,7 @@ const SignUpPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(''); // State for reCAPTCHA token
   const router = useRouter();
 
   const handleSignUp = async (e) => {
@@ -22,6 +24,11 @@ const SignUpPage = () => {
     // Check if password and confirm password match
     if (password !== confirmPassword) {
       setError('Passwords do not match. Please check the passwords.');
+      return;
+    }
+
+    if (!captchaToken) { // Validate reCAPTCHA token
+      setError('Please complete the reCAPTCHA.');
       return;
     }
 
@@ -113,6 +120,11 @@ const SignUpPage = () => {
               {showPassword ? 'Hide' : 'See'}
             </button>
           </div>
+          <ReCAPTCHA 
+            sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY} 
+            onChange={setCaptchaToken} 
+            className="mb-4" 
+          />
           <button
             type="submit"
             className="submit-btn w-full p-3 rounded text-white"

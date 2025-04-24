@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db, storage } from '@/app/firebase';
+import { db, storage } from '../../firebase';
 import { collection, addDoc, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
@@ -13,7 +13,7 @@ const UserDashboard = () => {
     const router = useRouter();
     const [carName, setCarName] = useState('');
     const [carType, setCarType] = useState('');
-    const [images, setImages] = useState([null, null, null]); // Three images for the car
+    const [images, setImages] = useState([null, null, null]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loadingMessage, setLoadingMessage] = useState('');

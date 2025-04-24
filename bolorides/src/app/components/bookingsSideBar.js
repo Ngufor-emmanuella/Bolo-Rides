@@ -1,11 +1,18 @@
 // app/components/bookingsSideBar.js
-import React from 'react';
-import Link from 'next/link';
 
-const Sidebar = ({ onSelect, activeView }) => {
+import React from 'react';
+
+const Sidebar = ({ onSelect, activeView, isOpen, onClose }) => {
   return (
-    <aside className="w-64 bg-gray-800 text-white min-h-screen p-4">
-      <h2 className="text-lg text-[#9b2f2f] font-semibold mb-4">More Car Details...</h2>
+    <aside className={`fixed inset-y-0 left-0 bg-gray-800 text-white p-4 transform transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:relative md:flex md:flex-col`}>
+      {/* Close button, only visible on mobile screens */}
+      <button
+        className="text-white mb-4 md:hidden" 
+        onClick={onClose} 
+      >
+        ✖
+      </button>
+      <h2 className="text-lg text-[#9b2f2b] font-semibold mb-4">More Car Details...</h2>
       <ul>
         <li className={`mb-2 ${activeView === 'cars' ? 'font-bold' : ''}`}>
           <button className="text-gray-300 hover:text-white" onClick={() => onSelect('cars')}>View Cars</button>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase'; 
 import { collection, getDocs } from 'firebase/firestore';
-import BookingModal from '../components/BookingModal';
+import BookingModal from '../components/bookingModal';
 import Sidebar from '../components/bookingsSideBar';
 import RentalBookings from '../components/rentalBookings';
 import Calendar from '../components/calender';

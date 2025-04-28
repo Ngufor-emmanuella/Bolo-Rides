@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from '../../public/assets/bolo-logo1.jpeg';
 
 export default function HomePage() {
   const [user] = useAuthState(auth);
@@ -21,11 +20,12 @@ export default function HomePage() {
 
   // Slider images array
   const sliderImages = [
-    logo,
-    logo,
-    logo,
-    logo,
-    logo
+    '/assets/bolo-logo1.jpeg',
+    '/assets/bolo-logo1.jpeg',
+    '/assets/bolo-logo1.jpeg',
+    '/assets/bolo-logo1.jpeg',
+    '/assets/bolo-logo1.jpeg',
+ 
   ];
 
   useEffect(() => {
@@ -53,11 +53,11 @@ export default function HomePage() {
   ];
 
   const firstGroupImages = [
-    logo,
-    logo,
-    logo,
-    logo,
-    logo
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
   ];
 
   // Define titles and descriptions for the second group of cards
@@ -78,11 +78,11 @@ export default function HomePage() {
   ];
 
   const secondGroupImages = [
-    logo,
-    logo,
-    logo,
-    logo,
-    logo
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
+   '/assets/bolo-logo1.jpeg',
   ];
 
   return (
@@ -172,7 +172,8 @@ export default function HomePage() {
         <h4 className="text-center text-xl font-bold mb-4">A Glimpse Of Our Cars</h4>
         <div className="flex justify-center">
           <div className="flex-none w-60 mx-2">
-            <Image src={sliderImages[currentIndex]} alt={`Slider Image ${currentIndex + 1}`} className="object-cover w-full h-40 rounded-lg" />
+            <Image src={sliderImages[currentIndex]} alt={`Slider Image ${currentIndex + 1}`}  width={100}
+                height={48} className="object-cover w-full h-40 rounded-lg" />
             <p className="text-center mt-2">Caption for Image {currentIndex + 1}</p>
           </div>
         </div>

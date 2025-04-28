@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from '../../../public/assets/bolo-logo1.jpeg';
+
 
 export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -15,13 +15,13 @@ export default function Header() {
 
   const handleLogout = () => {
     signOut(auth);
-    router.push('/'); // Redirect after logout
+    router.push('/'); 
   };
 
   return (
     <header className="p-2 sm:p-2 flex items-center justify-between gap-4">
       <div className="car-logo flex items-center gap-1">
-        <Image src={logo} alt="Logo" width={100} height={100} />
+        <Image src="/assets/bolo-logo1.jpeg"  alt="Logo" width={100} height={100} />
         <h1 className="logo-header text-base sm:text-lg">
           <Link href="/">Bolo Rides</Link>
         </h1>

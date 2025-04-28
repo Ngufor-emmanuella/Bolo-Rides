@@ -5,8 +5,8 @@ import { db, storage } from '../../firebase';
 import { collection, addDoc, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import TransactionForm from './components/TransactionForm';
-import AllDailyReports from './components/AllDailyReports';
+import TransactionForm from './components/transactionForm';
+import AllDailyReports from './components/allDailyReports';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const UserDashboard = () => {

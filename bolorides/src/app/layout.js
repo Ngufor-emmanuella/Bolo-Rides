@@ -14,7 +14,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`w-full max-w-[100%] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ${inter.className}`}>
+      <body className={`w-full max-w-[100%] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ${inter.className}`}
+        
+        data-new-gr-c-s-check-loaded="14.1232.0"
+        data-gr-ext-installed="">
+          
         <AuthProvider>
           <Header />
           <main className="flex-1">{children}</main>

@@ -20,11 +20,11 @@ export default function HomePage() {
 
   // Slider images array
   const sliderImages = [
-    '/assets/bolo-logo1.jpeg',
-    '/assets/bolo-logo1.jpeg',
-    '/assets/bolo-logo1.jpeg',
-    '/assets/bolo-logo1.jpeg',
-    '/assets/bolo-logo1.jpeg',
+    '/assets/prado-round.jpeg',
+    '/assets/tesla-front.jpeg',
+    '/assets/prado.jpeg',
+    '/assets/prado2.jpeg',
+    '/assets/prado-white.jpeg',
  
   ];
 
@@ -53,11 +53,11 @@ export default function HomePage() {
   ];
 
   const firstGroupImages = [
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
+   '/assets/affordable-prices.jpeg',
+   '/assets/delivery.jpeg',
+   '/assets/great-deals.jpeg',
+   '/assets/flexible-rental.jpg',
+   '/assets/easy-returns.jpeg',
   ];
 
   // Define titles and descriptions for the second group of cards
@@ -78,11 +78,11 @@ export default function HomePage() {
   ];
 
   const secondGroupImages = [
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
-   '/assets/bolo-logo1.jpeg',
+   '/assets/customer-support.jpeg',
+   '/assets/book-now.jpeg',
+   '/assets/good-prices.jpeg',
+   '/assets/flexible-rental.jpg',
+   '/assets/groups-transport.jpeg',
   ];
 
   return (
@@ -121,18 +121,27 @@ export default function HomePage() {
       {/* Objectives Section */}
       <div className="flex flex-col md:flex-row justify-center p-5 mt-10 mb-5 w-full">
           <div className="objectives w-full md:w-4/10 mb-4 md:mb-0 md:mr-12 h-34 flex flex-col items-center">
-            <h2 className="text-2xl font-bold mb-4" style={{ fontSize: '25px' }}>Our Mission</h2>
+          <div className="flex md:flex-row justify-center p-5 mt-5 ">
+            <Image src="/assets/mission.jpeg"  alt="Logo" width={70} height={70}/>
+            <h2 className="text-2xl font-bold mb-4 ml-3" style={{ fontSize: '25px' }}>Our Mission</h2>
+          </div>
             <p className="text-lg" style={{ fontSize: '20px' }}>
               At Bolo Rides, our mission is to provide seamless, reliable, and personalized car rental experiences that unlock the freedom to explore.
             </p>
           </div>
           <div className="objectives w-full md:w-4/10 mb-4 md:mb-0 md:mr-12 h-34 flex flex-col items-center">
-            <h2 className="text-2xl font-bold mb-4" style={{ fontSize: '25px' }}>Our Vision</h2>
+          <div className="flex md:flex-row justify-center p-5 mt-5 " > 
+            <Image src="/assets/vision.jpeg"  alt="Logo" width={50} height={50}/>
+            <h2 className="text-2xl font-bold mb-4 ml-3" style={{ fontSize: '25px' }}>Our Vision</h2>
+          </div>
             <p className="text-lg" style={{ fontSize: '20px' }}>
               Our vision is to revolutionize the car rental industry by setting new standards in convenience, sustainability, and customer delight.
             </p>
           </div>
       </div>
+      <br></br>
+      <br></br>
+      <br></br>
 
       {/* About Section */}
       <div className="objectives text-center p-5 mb-8">
@@ -168,20 +177,26 @@ export default function HomePage() {
       </div>
 
       {/* Image Slider Section */}
+      <br></br>
       <div className="objectives relative p-5">
         <h4 className="text-center text-xl font-bold mb-4">A Glimpse Of Our Cars</h4>
         <div className="flex justify-center">
-          <div className="flex-none w-60 mx-2">
-            <Image src={sliderImages[currentIndex]} alt={`Slider Image ${currentIndex + 1}`}  width={100}
-                height={48} className="object-cover w-full h-40 rounded-lg" />
-            <p className="text-center mt-2">Caption for Image {currentIndex + 1}</p>
+          <div className="flex-none w-2/5 mx-2"> 
+            <Image
+              src={sliderImages[currentIndex]}
+              alt={`Slider Image ${currentIndex + 1}`}
+              width={100}
+              height={48}
+              className="object-cover w-full h-auto rounded-lg" 
+            />
+            {/* <p className="text-center mt-2">Caption for Image {currentIndex + 1}</p> */}
           </div>
         </div>
       </div>
 
       {/* Call to Action Section */}
       <div className="objectives text-center p-5">
-        <h2 className="about-welcome">Join Bolo Ride Today!</h2>
+        <h2 className="about-welcome"><strong>Join Bolo Ride Today! </strong></h2>
         <p className="text-lg" style={{ fontSize: '20px' }}>
           <strong className="about-header">Book Your Ride? </strong>
           Message us on Facebook or call <strong>+237 652 921000</strong> to book your next trip with BoloRides.
@@ -190,136 +205,106 @@ export default function HomePage() {
       
       {/* Footer */}
 
-      <footer className="footer bg-gray-800 text-white">
-          <section className="py-10">
-            <div className="container mx-auto px-4">
-              <div className="flex flex-wrap justify-between">
-                <div className="w-full md:w-1/4 mb-6">
-                  <div className="widget-about text-md mb-4">
-                    <div className="logo mb-6">
-                      <Link href="index.html">
-                        <Image
-                          src="/images/bolo-logo1.jpeg"
-                          alt="logo"
-                          width={500}
-                          height={300}
-                          priority
-                          className="mb-4"
-                        />
-                      </Link>
-                    </div>
-                    <ul className="contact-info">
-                      <li className="flex items-center">
-                        <Image
-                          src="/images/brown.jpeg"
-                          alt="brown round icon"
-                          width={20}
-                          height={20}
-                          className="mr-2"
-                        />
-                        <strong>Address:</strong>
-                        <span> Douala, Inbetween total Bonateki and Pharmacy Akwa Nord</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="footer-link-widget w-full md:w-1/4 mb-6">
-                  <h4 className="widget-title text-lg font-semibold mb-3">Company</h4>
-                  <ul className="footer-list">
-                    <li><Link href="/about" className="hover:underline">About Us</Link></li>
-                    <li><Link href="/contact" className="hover:underline">Contact Us</Link></li>
-                    <li><Link href="#" className="hover:underline">Delivery Information</Link></li>
-                    <li><Link href="#" className="hover:underline">Terms &amp; Conditions</Link></li>
-                    <li className="flex items-center">
-                      <Image
-                        src="/images/brown.jpeg"
-                        alt="brown round icon"
-                        width={20}
-                        height={20}
-                        className="mr-2"
-                      />
-                      <strong>Call Us:</strong>
-                      <span> +237 652921000 / 693333940</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="footer-link-widget w-full md:w-1/4 mb-6">
-                  <h4 className="widget-title text-lg font-semibold mb-3">Account</h4>
-                  <ul className="footer-list">
-                    <li><Link href="/signup" className="hover:underline">Sign In</Link></li>
-                   
-                    <li className="flex items-center">
-                      <Image
-                        src="/images/brown.jpeg"
-                        alt="brown round icon"
-                        width={20}
-                        height={20}
-                        className="mr-2"
-                      />
-                      <strong>Email:</strong>
-                      <span> BoloRides.com</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Image
-                        src="/images/brown.jpeg"
-                        alt="brown round icon"
-                        width={20}
-                        height={20}
-                        className="mr-2"
-                      />
-                      <strong>Hours:</strong>
-                      <span>8:00 - 18:00, Mon - Sat</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="footer-link-widget w-full md:w-1/4 mb-6">
-                  <h4 className="widget-title text-lg font-semibold mb-3">Follow Us</h4>
-                  <ul className="footer-list flex space-x-4">
-                    <li className="mobile-social-icon">
-                      <Link href="#">
-                        <Image
-                          src="/images/brown.jpeg"
-                          alt="brown round icon"
-                          width={20}
-                          height={20}
-                          className="brown-icon"
-                        />
-                      </Link>
-                    </li>
-                    <li className="mobile-social-icon">
-                      <Link href="#">
-                        <Image
-                          src="/images/brown.jpeg"
-                          alt="brown round icon"
-                          width={20}
-                          height={20}
-                          className="brown-icon"
-                        />
-                      </Link>
-                    </li>
-                    <li className="mobile-social-icon">
-                      <Link href="#">
-                        <Image
-                          src="/images/brown.jpeg"
-                          alt="brown round icon"
-                          width={20}
-                          height={20}
-                          className="brown-icon"
-                        />
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="text-center mt-10">
-                <h6 className="site-copyright text-sm">Copyright 2025 © Bolo Rides... All rights reserved.</h6>
-              </div>
+      <footer className="bg-[#9b2f2f] text-white py-10">
+        <br></br>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between">
+            
+            {/* Logo and Address */}
+            <div className="w-full md:w-1/4 mb-6 text-center md:text-left">
+              <Link href="index.html">
+                <Image
+                  src="/assets/bolo-logo1.jpeg"
+                  alt="logo"
+                  width={100}
+                  height={100}
+                  priority
+                  className="mb-4 rounded-[15px]"
+                />
+              </Link>
+              <p className="flex items-center justify-center md:justify-start">
+                {/* <Image
+                  src="/assets/location.jpeg"
+                  alt="address icon"
+                  width={25}
+                  height={25}
+                  className="mr-2"
+                /> */}
+                <span>Douala, Inbetween total Bonateki 
+                 & Pharmacy Akwa Nord</span>
+              </p>
             </div>
-          </section>
+
+            {/* Company Links */}
+            <div className="w-full md:w-1/4 mb-6">
+              <h5 className="text-lg font-semibold mb-3">Company</h5>
+              <ul className="footer-list">
+                <li><Link href="/#" className="hover:underline">About Us</Link></li>
+                <li><Link href="/bookingsPage" className="hover:underline">Contact Us</Link></li>
+                <li><Link href="#" className="hover:underline">Terms & Conditions</Link></li>
+                <li className="flex items-center">
+                  
+                  <strong>Call Us:</strong>
+                  <span> +237 652921000 / 693333940</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Account Links */}
+            <div className="w-full md:w-1/4 mb-6">
+              <h4 className="text-lg font-semibold mb-3">Account</h4>
+              <ul className="footer-list">
+                <li><Link href="/signin" className="hover:underline">Sign In</Link></li>
+                <li className="flex items-center">
+        
+                  <strong>Email:</strong>
+                  <span> BoloRides.com</span>
+                </li>
+                <li className="flex items-center">
+                 
+                  <strong>Hours:</strong>
+                  <span>8:00 - 21:00, Mon - Sat</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Follow Us */}
+            <div className="w-full md:w-1/4 mb-6">
+              <h4 className="text-lg font-semibold mb-3">Follow Us</h4>
+              <ul className="flex space-x-4">
+                <li>
+                  <Link href="#">
+                    <Image
+                      src="/assets/facebook.jpeg"
+                      alt="social icon"
+                      width={25}
+                      height={25}
+                      className="brown-icon"
+                    />
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#">
+                    <Image
+                      src="/assets/instagram.jpeg"
+                      alt="social icon"
+                      width={25}
+                      height={25}
+                      className="brown-icon"
+                    />
+                  </Link>
+                </li>
+                <li>
+                  
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="text-center mt-10">
+            <h6 className="text-sm">Copyright 2025 © Bolo Rides... All rights reserved.</h6>
+          </div>
+        </div>
       </footer>
       
     </div>

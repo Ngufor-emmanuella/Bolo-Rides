@@ -1,7 +1,11 @@
 # Bolo-Rides
 # BoloRides Application
-
+This is a car rental and management application built using Next.js and firebase.
 ## Prerequisites
+- install node js
+- install next js
+- run mpm install to install all dependencies 
+
 - Docker
 - Docker Compose
 

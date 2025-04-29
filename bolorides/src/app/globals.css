@@ -82,11 +82,11 @@ body {
 .header-btn {
   background-color: #9b2f2f;
   color: #ffffff;
-  padding: 1%;
+  padding: 3%;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 22px;
   border-radius: 10px;
-  width: 15%;
+  width: 45%;
 }
 
 .card-title {
@@ -250,4 +250,17 @@ body {
     width: 100%; 
     margin-left: 0;
   }
+
+  .header-btn {
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 10px;
+    width: 25%;
+  }
+
+  .header-text {
+    font-size: 1.5rem;
+  }
+
+
 }

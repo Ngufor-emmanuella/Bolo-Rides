@@ -55,23 +55,29 @@ const Calendar = () => {
       const date = new Date(year, month, day);
       const booked = isBooked(date);
       const isPast = date < new Date();
+      const isFutureMonth = currentDate.getMonth() !== month;
+
       const className = booked.length > 0
-        ? (isPast ? 'border p-2 bg-green-100' : 'border p-2 bg-green-600 text-white') // Current & future bookings
-        : (isPast ? 'border p-2' : 'border p-2 bg-green-200'); // Future bookings
+        ? (isFutureMonth ? 'border p-2 bg-red-600 text-white' : 'border p-2 bg-green-600 text-white') // Booked in future months (red) or current month (green)
+        : (isPast ? 'border p-2' : 'border p-2 bg-green-200'); // Future unbooked days
 
       calendarDays.push(
         <div key={day} className={className}>
           <div>{day}</div>
-          {booked.map(booking => (
-            <div key={booking.id} className="text-sm">
-              <span className="font-semibold">{booking.carName}</span>
-            </div>
-          ))}
         </div>
       );
     }
 
-    return calendarDays;
+    return (
+      <div className="mt-4">
+        <h2 className="text-xl text-[#9b2f2b] font-bold">
+          {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(currentDate)}
+        </h2>
+        <div className="grid grid-cols-7 gap-1">
+          {calendarDays}
+        </div>
+      </div>
+    );
   };
 
   const renderUpcomingMonths = () => {
@@ -94,21 +100,15 @@ const Calendar = () => {
             <h2 className="text-xl text-[#9b2f2b] font-bold">
               Upcoming Rentals for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(year, month))}
             </h2>
-            <br />
             <div className="grid grid-cols-7 gap-1">
               {Array.from({ length: daysInMonth }, (_, day) => {
                 const date = new Date(year, month, day + 1);
                 const booked = isBooked(date);
-                const className = booked.length > 0 ? 'border p-2 bg-green-300' : 'border p-2';
+                const className = booked.length > 0 ? 'border p-2 bg-red-600 text-white' : 'border p-2'; // Highlight booked days red
 
                 return (
                   <div key={day} className={className}>
                     <div>{day + 1}</div>
-                    {booked.map(booking => (
-                      <div key={booking.id} className="text-sm">
-                        <span className="font-semibold">{booking.carName}</span>
-                      </div>
-                    ))}
                   </div>
                 );
               })}
@@ -136,19 +136,9 @@ const Calendar = () => {
         <p className="text-lg">Please hold on...</p>
       ) : (
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-1">
-            {/* Day names */}
-            <div className="text-center font-bold">Monday</div>
-            <div className="text-center font-bold">Tuesday</div>
-            <div className="text-center font-bold">Wednesday</div>
-            <div className="text-center font-bold">Thursday</div>
-            <div className="text-center font-bold">Friday</div>
-            <div className="text-center font-bold">Saturday</div>
-            <div className="text-center font-bold">Sunday</div>
-            {renderCalendar()}
-          </div>
+          {renderCalendar()} {/* Render current month */}
           <br />
-          {renderUpcomingMonths()}
+          {renderUpcomingMonths()} {/* Render upcoming months */}
           <br />
         </div>
       )}

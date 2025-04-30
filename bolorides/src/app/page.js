@@ -96,12 +96,7 @@ export default function HomePage() {
           <h5 className="header-add text-white text-lg md:text-xl font-bold mb-6">THE BEST CAR RENTALS IN CAMEROON!</h5>
 
           <div className="relative">
-            <button 
-              onClick={() => setShowDropdown(!showDropdown)} 
-              className="header-btn inline-block mb-6 px-4 py-2 rounded bg-blue-500 text-white"
-            >
-              User Accounts
-            </button>
+          <Link className="header-btn inline-block mb-6" href="/bookingsPage">Book Us Now!!</Link>
             {showDropdown && (
               <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-20">
                 {!user ? (

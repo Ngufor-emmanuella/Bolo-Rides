@@ -62,7 +62,7 @@ const ViewBookingHistory = () => {
       <h1 className="text-2xl text-[#9b2f2f] mb-4">Booking History for {new Date().getFullYear()}</h1>
 
       {/* Filter Form */}
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <input
           type="text"
           placeholder="Enter Month (e.g., January)"
@@ -76,7 +76,7 @@ const ViewBookingHistory = () => {
         >
           Reset Filter
         </button>
-      </div>
+      </div> */}
 
       {Object.entries(filteredGroupedBookings).map(([month, bookings]) => (
         <div key={month} className="mb-4"> 

@@ -7,6 +7,7 @@ import UserCars from './userCars';
 import UserReports from './userReports';
 import MonthlyReport from './monthlyReports'; 
 import ViewBookingHistory from './viewBookingHistory';
+import InviteUser from './inviteUser';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -156,6 +157,12 @@ const AdminDashboard = () => {
             {/* Aside Navigation */}
             <aside className={`fixed inset-y-0 left-0 w-3/5 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
                 {currentUser && <h1 className="text-xl  text-[#9b2f2f] mb-4">Welcome, {currentUser.name}!</h1>}
+
+                <InviteUser />
+                <br />
+                <hr />
+                <br />
+
                 <h3 className="text-xl mb-2">List Of All Admins</h3>
                 {admins.map(admin => (
                     <div key={admin.id} className="mb-2">

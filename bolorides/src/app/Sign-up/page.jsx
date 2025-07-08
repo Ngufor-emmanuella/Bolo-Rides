@@ -39,7 +39,7 @@ const SignUpPage = () => {
       const expiresAt = inviteData.expiresAt ? inviteData.expiresAt.toDate() : null;
 
       if (!expiresAt) {
-        setIsTokenValid(true); // Allow access if there's no expiration
+        setIsTokenValid(true); 
         return;
       }
 
@@ -51,7 +51,7 @@ const SignUpPage = () => {
       if (expiresAt < currentTime) {
         setError('Invalid invite link, already expired. Please contact the administrators of BoloRides.');
       } else {
-        setIsTokenValid(true); // Set token as valid if it hasn't expired
+        setIsTokenValid(true); 
       }
     };
 
@@ -102,11 +102,22 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+
+     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
       <div className="signup p-10 rounded-lg shadow-xl w-96">
         <h1 className="text-2xl mb-5">Sign Up</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        {isTokenValid && ( // Only show the form if the token is valid
+        {error && (
+          <div>
+            <p className="text-red-500">{error}</p>
+            <button 
+              onClick={() => router.push('/')} 
+              className="mt-4 w-full p-2 rounded bg-[#9b2f2f] text-white"
+            >
+              Back to Home
+            </button>
+          </div>
+        )}
+        {isTokenValid && (
           <form onSubmit={handleSignUp}>
             <label>UserName:</label>
             <input
@@ -177,6 +188,7 @@ const SignUpPage = () => {
         )}
       </div>
     </div>
+   
   );
 };
 

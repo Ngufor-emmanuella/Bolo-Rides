@@ -9,6 +9,7 @@ import TransactionForm from './components/transactionForm';
 import AllDailyReports from './components/allDailyReports';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+// Driver dashboard
 const UserDashboard = () => {
     const router = useRouter();
     const [carName, setCarName] = useState('');
@@ -26,6 +27,8 @@ const UserDashboard = () => {
     const [showDailyReports, setShowDailyReports] = useState(false);
     const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [userRole, setUserRole] = useState('');
+
     const auth = getAuth();
 
     useEffect(() => {
@@ -36,6 +39,7 @@ const UserDashboard = () => {
                     const userDoc = await getDoc(doc(db, 'Users', authUser.uid));
                     if (userDoc.exists()) {
                         setUserName(userDoc.data().name);
+                        setUserRole(userDoc.data().role);
                     } else {
                         console.warn("User document not found for UID:", authUser.uid);
                         setUserName(authUser.email);
@@ -50,7 +54,7 @@ const UserDashboard = () => {
                 }
             } else {
                 router.push('/Sign-in');
-            }
+            }          
         });
 
         return () => unsubscribe();
@@ -67,13 +71,12 @@ const UserDashboard = () => {
             setError('Please fill all fields and upload three images.');
             return;
         }
-    
 
         try {
             if (!user) {
                 throw new Error("User is not authenticated.");
             }
-    
+
             // Upload images to Firebase Storage and get URLs
             const imageUrls = await Promise.all(
                 images.map(async (image, index) => {
@@ -91,7 +94,7 @@ const UserDashboard = () => {
                 userName: userName,
                 carName,
                 carType,
-                images: imageUrls, // Store image URLs
+                images: imageUrls,
                 created_at: new Date(),
             };
 
@@ -194,7 +197,18 @@ const UserDashboard = () => {
                                 </button>
                             </li>
                         ))}
+
+                        {/* Button to access admin dashboard */}
+                        {userRole === 'admin' || userRole === 'supreme' ? (
+                            <button
+                            onClick={() => router.push(`/admin?userId=${encodeURIComponent(user.uid)}`)}
+                                className="mt-4 bg-red-500 text-white p-2 rounded"
+                            >
+                                Go to Admin Dashboard
+                            </button>
+                        ) : null}
                     </ul>
+
                     <button
                         onClick={() => setShowAddCarForm(!showAddCarForm)}
                         className="mt-4 bg-green-500 text-white p-2 rounded"

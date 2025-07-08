@@ -8,6 +8,9 @@ import UserReports from './userReports';
 import MonthlyReport from './monthlyReports'; 
 import ViewBookingHistory from './viewBookingHistory';
 import InviteUser from './inviteUser';
+import { useRouter } from 'next/navigation'; // Correctly import useRouter
+import { useSearchParams } from 'next/navigation';
+
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -28,8 +31,12 @@ const AdminDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showBookingHistory, setShowBookingHistory] = useState(false); // New state for booking history
 
+    const searchParams = useSearchParams();
+    
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
+    const router = useRouter(); // Initialize the router
 
+    
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -41,9 +48,15 @@ const AdminDashboard = () => {
                 const allAdmins = usersList.filter(user => user.role === 'admin' || user.role === 'supreme');
                 setAdmins(allAdmins.sort((a, b) => (a.role === 'supreme' ? -1 : 1)));
 
-                const loggedInUser = usersList.find(user => user.id === supremeAdminId);
-                if (loggedInUser) {
-                    setCurrentUser(loggedInUser);
+                // Get userId from the query params
+                
+                const userId = searchParams.get('userId');
+
+                if (userId) {
+                    const loggedInUser = usersList.find(user => user.id === userId);
+                    if (loggedInUser) {
+                        setCurrentUser(loggedInUser); // Set the current user to the promoted driver
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching users:', err);
@@ -54,7 +67,7 @@ const AdminDashboard = () => {
         };
 
         fetchUsers();
-    }, []);
+    }, [router.query]); // Depend on router.query to fetch user info when it changes
 
     const handleUserClick = (userId) => {
         setExpandedUserId(expandedUserId === userId ? null : userId);
@@ -156,7 +169,11 @@ const AdminDashboard = () => {
            
             {/* Aside Navigation */}
             <aside className={`fixed inset-y-0 left-0 w-3/5 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
-                {currentUser && <h1 className="text-xl  text-[#9b2f2f] mb-4">Welcome, {currentUser.name}!</h1>}
+                {currentUser ? (
+                    <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, {currentUser.name}!</h1>
+                ) : (
+                    <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, Supreme Admin!</h1>
+                )}
 
                 <InviteUser />
                 <br />
@@ -177,13 +194,13 @@ const AdminDashboard = () => {
                  {/* Button to toggle booking history */}
                  <button 
                     onClick={toggleBookingHistory} 
-                    className="mt-4 bg-[#9b2f2f] text-white p-2 rounded w-full"
+                    className="mt-4 bg-[#9b2f2b] text-white p-2 rounded w-full"
                 >
                     {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
                 </button>
 
-                <br></br>
-                <br></br>
+                <br />
+                <br />
 
                 <h3 className="text-xl mb-2">List Of All Users</h3>
                 {users.map(user => (
@@ -198,12 +215,11 @@ const AdminDashboard = () => {
                             {user.role === 'user' && (
                                 <button 
                                     onClick={() => promoteUserToAdmin(user.id)} 
-                                    className="ml-2  bg-[#9b2f2f] text-white p-1 rounded"
+                                    className="ml-2 bg-[#9b2f2b] text-white p-1 rounded"
                                     disabled={processing}
                                 >
                                     Promote to Admin
                                 </button>
-                                
                             )}
                             {user.role === 'admin' && user.id !== supremeAdminId && (
                                 <button 
@@ -214,9 +230,8 @@ const AdminDashboard = () => {
                                     Remove Admin
                                 </button>
                             )}
-                              
                         </div>
-                        <br></br>
+                        <br />
                         {expandedUserId === user.id && (
                             <UserCars 
                                 userId={user.id} 
@@ -226,13 +241,11 @@ const AdminDashboard = () => {
                         )}
                     </div>
                 ))}
-
-               
             </aside>
 
             <main className="flex-1 p-4">
                 <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl  text-[#9b2f2f] ">Admin Dashboard</h1>
+                    <h1 className="text-2xl text-[#9b2f2b]">Admin Dashboard</h1>
                     
                     <button 
                         className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
@@ -260,7 +273,7 @@ const AdminDashboard = () => {
 
                                     <button
                                         onClick={() => setViewingMonthlyReport(true)}
-                                        className=" bg-[#9b2f2f] text-white p-2 rounded mr-2"
+                                        className="bg-[#9b2f2b] text-white p-2 rounded mr-2"
                                     >
                                         Fetch Monthly Report
                                     </button>

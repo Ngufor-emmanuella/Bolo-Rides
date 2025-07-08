@@ -21,7 +21,7 @@ const BookingModal = ({ car, onClose }) => {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [feedback, setFeedback] = useState({ error: '', success: '' });
   const [recaptchaToken, setRecaptchaToken] = useState(null); // State to hold the reCAPTCHA token
-  const recaptchaRef = useRef(); // Reference for reCAPTCHA
+  const recaptchaRef = useRef();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,7 +29,7 @@ const BookingModal = ({ car, onClose }) => {
   };
 
   const handleCaptchaChange = (token) => {
-    setRecaptchaToken(token); // Store the reCAPTCHA token
+    setRecaptchaToken(token); 
   };
 
   const handleSubmit = async (e) => {
@@ -61,7 +61,7 @@ const BookingModal = ({ car, onClose }) => {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...bookingData, recaptchaToken }), // Include reCAPTCHA token
+        body: JSON.stringify({ ...bookingData, recaptchaToken }), 
       });
 
       if (response.ok) {
@@ -83,7 +83,7 @@ const BookingModal = ({ car, onClose }) => {
         name: '',
         countryCode: '+237',
       });
-      setRecaptchaToken(null); // Reset reCAPTCHA token
+      setRecaptchaToken(null); 
 
       setTimeout(() => {
         setFeedback({ ...feedback, success: '' });

@@ -5,14 +5,14 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import ReCAPTCHA from 'react-google-recaptcha'; // Import ReCAPTCHA
+import ReCAPTCHA from 'react-google-recaptcha'; 
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState(''); // State for reCAPTCHA token
+  const [captchaToken, setCaptchaToken] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -26,7 +26,7 @@ const SignIn = () => {
       return;
     }
 
-    if (!captchaToken) { // Validate reCAPTCHA token
+    if (!captchaToken) { 
       setErrorMessage('Please complete the reCAPTCHA.');
       setLoading(false);
       return;
@@ -42,7 +42,7 @@ const SignIn = () => {
         const userData = userDoc.data();
         const userRole = userData.role;
 
-        if (userRole === 'supreme' || userRole === 'admin') {
+        if (userRole === 'supreme') {
           router.push('/admin');
         } else {
           router.push(`/dashboard/${user.uid}`);

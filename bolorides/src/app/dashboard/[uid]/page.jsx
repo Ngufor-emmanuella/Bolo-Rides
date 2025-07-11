@@ -170,7 +170,7 @@ const UserDashboard = () => {
     return (
         <div>
             <header className="flex justify-center items-center p-4">
-                <h1 className="text-2xl text-center mt-4">Welcome, {userName || user?.email}!</h1>
+                <h1 className="text-2xl text-center mt-5">Welcome, {userName || user?.email}!</h1>
                 <button
                     className="md:hidden p-2 mt-5 text-white bg-[#9b2f2b] rounded z-50 ml-4"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -183,7 +183,7 @@ const UserDashboard = () => {
 
                 {/* Aside Navigation */}
                 <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 pt-23 md:pt-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4 md:h-full`}>
-                    <h2 className="text-xl font-bold">My Cars</h2>
+                    <h2 className="text-xl font-bold">My Cars...</h2>
                     <ul>
                         {cars.map(car => (
                             <li key={car.id} className="my-2">

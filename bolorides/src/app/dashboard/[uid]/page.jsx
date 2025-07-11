@@ -170,9 +170,9 @@ const UserDashboard = () => {
     return (
         <div>
             <header className="flex justify-center items-center p-4">
-                <h1 className="text-2xl text-center">Welcome, {userName || user?.email}!</h1>
+                <h1 className="text-2xl text-center mt-5">Welcome, {userName || user?.email}!</h1>
                 <button
-                    className="md:hidden p-2 text-white bg-blue-500 rounded z-50 ml-4"
+                    className="md:hidden p-2 mt-5 text-white bg-[#9b2f2b] rounded z-50 ml-4"
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                 >
                     {sidebarOpen ? 'X' : '☰'}

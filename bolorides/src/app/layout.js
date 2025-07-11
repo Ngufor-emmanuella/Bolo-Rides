@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`w-full max-w-[100%] mx-auto text-sm sm:text-base min-h-screen flex flex-col text-slate-700 ${inter.className}`}
-        
+        // NB: The recaptcha app to use in the admin console is v2 with name bolorides
         data-new-gr-c-s-check-loaded="14.1232.0"
         data-gr-ext-installed="">
           

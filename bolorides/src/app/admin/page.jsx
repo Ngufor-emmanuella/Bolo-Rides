@@ -168,7 +168,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col md:flex-row">
            
             {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-3/5 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
+            <aside className={`fixed inset-y-0 left-0 w-3/5 pt-23 md:pt-4 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
                 {currentUser ? (
                     <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, {currentUser.name}!</h1>
                 ) : (
@@ -244,11 +244,11 @@ const AdminDashboard = () => {
             </aside>
 
             <main className="flex-1 p-4">
-                <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl text-[#9b2f2b]">Admin Dashboard</h1>
+                <div className="flex items-center justify-center mb-4">
+                    <h1 className="text-2xl text-[#9b2f2b] pr-3">Admin Dashboard</h1>
                     
                     <button 
-                        className="md:hidden p-2 text-white bg-blue-500 rounded z-50"
+                        className="md:hidden p-2 text-white bg-[#9b2f2b] rounded z-50"
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                     >
                         {sidebarOpen ? 'X' : '☰'}

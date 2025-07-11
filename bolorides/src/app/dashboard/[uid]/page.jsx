@@ -67,7 +67,7 @@ const UserDashboard = () => {
         setLoadingMessage('Adding car, hold on...');
 
         // Check if all fields are filled
-        if (!carName || !carType || images.some(img => !img)) {
+        if (!carName || !carType) {
             setError('Please fill all fields and upload three images.');
             return;
         }
@@ -75,34 +75,37 @@ const UserDashboard = () => {
         try {
             if (!user) {
                 throw new Error("User is not authenticated.");
-            }
-
-            // Upload images to Firebase Storage and get URLs
-            const imageUrls = await Promise.all(
-                images.map(async (image, index) => {
-                    if (!image) {
-                        throw new Error(`Image ${index + 1} is missing.`);
-                    }
-                    const storageRef = ref(storage, `car-images/${user.uid}/${Date.now()}-${image.name}`);
-                    await uploadBytes(storageRef, image);
-                    return getDownloadURL(storageRef);
-                })
-            );
+            }           
 
             const carData = {
                 userId: user.uid,
                 userName: userName,
                 carName,
                 carType,
-                images: imageUrls,
+                images: [],
                 created_at: new Date(),
             };
+
+              // Upload images if any are provided
+            const imageUrls = await Promise.all(
+                images.map(async (image) => {
+                    if (image) {
+                        const storageRef = ref(storage, `car-images/${user.uid}/${Date.now()}-${image.name}`);
+                        await uploadBytes(storageRef, image);
+                        return getDownloadURL(storageRef);
+                    }
+                    return null; // Return null for missing images
+                })
+            );
+
+            // Only add non-null URLs to carData.images
+            carData.images = imageUrls.filter(url => url !== null);
 
             await addDoc(collection(db, 'Cars'), carData);
             setSuccess(`${carName} added successfully!`);
             setCarName('');
             setCarType('');
-            setImages([null, null, null]); // Reset images
+            setImages([null, null, null]);
             const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
             const carSnapshot = await getDocs(carQuery);
             const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -119,11 +122,6 @@ const UserDashboard = () => {
         }
     };
 
-    const handleImageChange = (index, event) => {
-        const newImages = [...images];
-        newImages[index] = event.target.files[0]; // Save the selected file
-        setImages(newImages);
-    };
 
     const handleCarSelect = (car) => {
         setActiveCarId(car.id);
@@ -184,7 +182,7 @@ const UserDashboard = () => {
             <div className="flex flex-col md:flex-row">
 
                 {/* Aside Navigation */}
-                <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4 md:h-full`}>
+                <aside className={`fixed inset-y-0 left-0 w-3/4 md:w-1/4 bg-gray-100 p-4 pt-23 md:pt-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4 md:h-full`}>
                     <h2 className="text-xl font-bold">My Cars</h2>
                     <ul>
                         {cars.map(car => (
@@ -233,28 +231,30 @@ const UserDashboard = () => {
                                 required
                                 className="border p-2 mb-2 w-full"
                             />
-                            {/* Image Uploads */}
-                            <input
+                            {/* Image Uploads of car  */}
+                            {/* <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(0, e)}
-                                required
+                               
                                 className="border p-2 mb-2 w-full"
-                            />
-                            <input
+                            /> */}
+                            {/* <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(1, e)}
-                                required
+                              
                                 className="border p-2 mb-2 w-full"
-                            />
-                            <input
+                            /> */}
+                            {/* <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(2, e)}
-                                required
+                               
                                 className="border p-2 mb-2 w-full"
-                            />
+                            /> */}
+
+
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
                             {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
                             {success && <p className="mt-2 text-green-500">{success}</p>}

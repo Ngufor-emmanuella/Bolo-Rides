@@ -14,7 +14,7 @@ const SignUpPage = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
-  const [isTokenValid, setIsTokenValid] = useState(false); // New state to track token validity
+  const [isTokenValid, setIsTokenValid] = useState(false); 
   const router = useRouter();
 
   useEffect(() => {

@@ -8,7 +8,7 @@ import UserReports from './userReports';
 import MonthlyReport from './monthlyReports'; 
 import ViewBookingHistory from './viewBookingHistory';
 import InviteUser from './inviteUser';
-import { useRouter } from 'next/navigation'; // Correctly import useRouter
+import { useRouter } from 'next/navigation'; 
 import { useSearchParams } from 'next/navigation';
 
 
@@ -29,12 +29,12 @@ const AdminDashboard = () => {
     const [processing, setProcessing] = useState(false);
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [showBookingHistory, setShowBookingHistory] = useState(false); // New state for booking history
+    const [showBookingHistory, setShowBookingHistory] = useState(false); 
 
     const searchParams = useSearchParams();
     
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
-    const router = useRouter(); // Initialize the router
+    const router = useRouter(); 
 
     
     useEffect(() => {
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
                 if (userId) {
                     const loggedInUser = usersList.find(user => user.id === userId);
                     if (loggedInUser) {
-                        setCurrentUser(loggedInUser); // Set the current user to the promoted driver
+                        setCurrentUser(loggedInUser); 
                     }
                 }
             } catch (err) {
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
         };
 
         fetchUsers();
-    }, [router.query]); // Depend on router.query to fetch user info when it changes
+    }, [router.query]); 
 
     const handleUserClick = (userId) => {
         setExpandedUserId(expandedUserId === userId ? null : userId);

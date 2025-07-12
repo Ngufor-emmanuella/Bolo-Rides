@@ -86,7 +86,7 @@ const CarList = ({ userId, userName }) => {
                     />
                 ))
             ) : (
-                <p className="text-gray-500">No cars found.</p>
+                <p className="text-gray-500">No cars found...</p>
             )}
             {error && <p className="text-red-500">{error}</p>}
             {success && <p className="text-green-500">{success}</p>}

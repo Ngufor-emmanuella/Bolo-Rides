@@ -53,7 +53,7 @@ const CarCard = ({ car, userId, userName, activeCarId, setActiveCarId }) => {
             ...transaction.data,
             type: transaction.type,
             userId,
-            userName, // Use userName passed as a prop
+            userName,
             carId,
             carName,
             createdAt: new Date(),
@@ -61,7 +61,7 @@ const CarCard = ({ car, userId, userName, activeCarId, setActiveCarId }) => {
 
         try {
             await addDoc(collection(db, 'DailyReports'), reportData);
-            resetTransactionData(index); // Reset transaction data after successful submission
+            resetTransactionData(index); 
         } catch (error) {
             console.error('Error adding report:', error.message);
         }

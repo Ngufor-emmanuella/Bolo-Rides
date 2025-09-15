@@ -48,13 +48,19 @@ const UserDashboard = () => {
                     const carSnapshot = await getDocs(carQuery);
                     const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setCars(carList);
+
+                    // Set the first car as the active car if available
+                    if (carList.length > 0) {
+                        setActiveCarId(carList[0].id);
+                        setShowTransactionForm(true); // Automatically show the transaction form
+                    }
                 } catch (e) {
                     console.error("Error fetching user data:", e);
                     setError("Error fetching user data.");
                 }
             } else {
                 router.push('/Sign-in');
-            }          
+            }
         });
 
         return () => unsubscribe();
@@ -75,7 +81,7 @@ const UserDashboard = () => {
         try {
             if (!user) {
                 throw new Error("User is not authenticated.");
-            }           
+            }
 
             const carData = {
                 userId: user.uid,
@@ -86,7 +92,7 @@ const UserDashboard = () => {
                 created_at: new Date(),
             };
 
-              // Upload images if any are provided
+            // Upload images if any are provided
             const imageUrls = await Promise.all(
                 images.map(async (image) => {
                     if (image) {
@@ -101,15 +107,24 @@ const UserDashboard = () => {
             // Only add non-null URLs to carData.images
             carData.images = imageUrls.filter(url => url !== null);
 
-            await addDoc(collection(db, 'Cars'), carData);
+            // Add car to Firestore
+            const carDocRef = await addDoc(collection(db, 'Cars'), carData);
             setSuccess(`${carName} added successfully!`);
             setCarName('');
             setCarType('');
             setImages([null, null, null]);
+
+            // Fetch updated list of cars
             const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
             const carSnapshot = await getDocs(carQuery);
             const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setCars(carList);
+
+            // Set the newly added car as active and show the transaction form
+            if (carList.length > 0) {
+                setActiveCarId(carDocRef.id); // Set to the newly created car
+                setShowTransactionForm(true); // Show transaction form for the new car
+            }
         } catch (error) {
             console.error('Error adding car:', error);
             setError(`Failed to add car name successfully: ${error.message}`);
@@ -121,7 +136,6 @@ const UserDashboard = () => {
             }, 5000);
         }
     };
-
 
     const handleCarSelect = (car) => {
         setActiveCarId(car.id);
@@ -199,7 +213,7 @@ const UserDashboard = () => {
                         {/* Button to access admin dashboard */}
                         {userRole === 'admin' || userRole === 'supreme' ? (
                             <button
-                            onClick={() => router.push(`/admin?userId=${encodeURIComponent(user.uid)}`)}
+                                onClick={() => router.push(`/admin?userId=${encodeURIComponent(user.uid)}`)}
                                 className="mt-4 bg-red-500 text-white p-2 rounded"
                             >
                                 Go to Admin Dashboard
@@ -236,24 +250,20 @@ const UserDashboard = () => {
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(0, e)}
-                               
                                 className="border p-2 mb-2 w-full"
                             /> */}
                             {/* <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(1, e)}
-                              
                                 className="border p-2 mb-2 w-full"
                             /> */}
                             {/* <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageChange(2, e)}
-                               
                                 className="border p-2 mb-2 w-full"
                             /> */}
-
 
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
                             {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}

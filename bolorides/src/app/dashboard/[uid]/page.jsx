@@ -72,7 +72,6 @@ const UserDashboard = () => {
         setSuccess('');
         setLoadingMessage('Adding car, hold on...');
 
-        // Check if all fields are filled
         if (!carName || !carType) {
             setError('Please fill all fields and upload three images.');
             return;
@@ -92,7 +91,6 @@ const UserDashboard = () => {
                 created_at: new Date(),
             };
 
-            // Upload images if any are provided
             const imageUrls = await Promise.all(
                 images.map(async (image) => {
                     if (image) {
@@ -100,30 +98,26 @@ const UserDashboard = () => {
                         await uploadBytes(storageRef, image);
                         return getDownloadURL(storageRef);
                     }
-                    return null; // Return null for missing images
+                    return null;
                 })
             );
 
-            // Only add non-null URLs to carData.images
             carData.images = imageUrls.filter(url => url !== null);
 
-            // Add car to Firestore
             const carDocRef = await addDoc(collection(db, 'Cars'), carData);
             setSuccess(`${carName} added successfully!`);
             setCarName('');
             setCarType('');
             setImages([null, null, null]);
 
-            // Fetch updated list of cars
             const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
             const carSnapshot = await getDocs(carQuery);
             const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setCars(carList);
 
-            // Set the newly added car as active and show the transaction form
             if (carList.length > 0) {
-                setActiveCarId(carDocRef.id); // Set to the newly created car
-                setShowTransactionForm(true); // Show transaction form for the new car
+                setActiveCarId(carDocRef.id);
+                setShowTransactionForm(true);
             }
         } catch (error) {
             console.error('Error adding car:', error);
@@ -139,10 +133,10 @@ const UserDashboard = () => {
 
     const handleCarSelect = (car) => {
         setActiveCarId(car.id);
-        setShowTransactionForm(false);
+        setShowTransactionForm(true); // Show the transaction form immediately
         setShowDailyReports(false);
         setTransactions([{ type: 'revenue', data: {} }]);
-        setSidebarOpen(false);
+        setSidebarOpen(false); // Close the sidebar
     };
 
     const handleAddTransaction = () => {

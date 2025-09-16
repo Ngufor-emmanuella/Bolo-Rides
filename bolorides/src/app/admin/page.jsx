@@ -204,6 +204,19 @@ const AdminDashboard = () => {
                     {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
                 </button>
 
+                {/* button to return to driver's account */}
+
+                {currentUser?.role === 'admin' && (
+                    <button
+                        onClick={() => {
+                            router.push(`/dashboard/${currentUser.id}`); 
+                        }}
+                        className="mt-4 bg-green-500 text-white p-2 rounded w-full"
+                    >
+                        Return to Driver's Account
+                    </button>
+                )}
+
                 <br />
                 <br />
 
@@ -282,14 +295,6 @@ const AdminDashboard = () => {
                                     >
                                         Fetch Monthly Report
                                     </button>
-
-                                    <input
-                                        type="number"
-                                        value={reportYear}
-                                        onChange={handleYearChange}
-                                        placeholder="Enter Year (e.g., 2024)"
-                                        className="border p-1 ml-2"
-                                    />
                                 </div>
 
                                 {showReports && <UserReports reports={reports} />}

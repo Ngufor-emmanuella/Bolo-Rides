@@ -9,6 +9,8 @@ const ViewBookingHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filteredMonth, setFilteredMonth] = useState(''); // State for filtering by month
+  const [year, setYear] = useState(new Date().getFullYear()); // Year input state
+  const [showNoReportsMessage, setShowNoReportsMessage] = useState(false); // Message for no reports
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -18,7 +20,7 @@ const ViewBookingHistory = () => {
         const bookingsSnapshot = await getDocs(bookingsCollection);
         const bookingList = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Filter bookings for the current year
+        // Initially filter bookings for the current year
         const currentYear = new Date().getFullYear();
         const filteredBookings = bookingList.filter(booking => {
           const bookingDate = new Date(booking.startDate);
@@ -36,6 +38,38 @@ const ViewBookingHistory = () => {
 
     fetchBookings();
   }, []);
+
+  const handleYearChange = (event) => {
+    setYear(event.target.value);
+    setShowNoReportsMessage(false); // Reset the message when changing the year
+  };
+
+  const handleFetchReports = async () => {
+    setLoading(true);
+    setShowNoReportsMessage(false); // Reset the message before fetching
+
+    try {
+      const bookingsCollection = collection(db, 'RentalBookings');
+      const bookingsSnapshot = await getDocs(bookingsCollection);
+      const bookingList = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      // Filter bookings for the specified year
+      const filteredBookings = bookingList.filter(booking => {
+        const bookingDate = new Date(booking.startDate);
+        return bookingDate.getFullYear() === parseInt(year, 10);
+      });
+
+      setBookings(filteredBookings);
+
+      // Show no reports message if none are found
+      setShowNoReportsMessage(filteredBookings.length === 0);
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setError('Failed to load booking history.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -59,28 +93,32 @@ const ViewBookingHistory = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl text-[#9b2f2f] mb-4">Booking History for {new Date().getFullYear()}</h1>
+      <h1 className="text-2xl text-[#9b2f2f] mb-4">Booking History for {year}</h1>
 
-      {/* Filter Form */}
-      {/* <div className="mb-4">
+      {/* Year Input Field */}
+      <div className="mb-4">
         <input
-          type="text"
-          placeholder="Enter Month (e.g., January)"
-          value={filteredMonth}
-          onChange={(e) => setFilteredMonth(e.target.value)}
+          type="number"
+          placeholder="Enter Year (e.g., 2024)"
+          value={year}
+          onChange={handleYearChange}
           className="border p-2 rounded mr-2"
         />
         <button
-          onClick={() => setFilteredMonth('')}
-          className="bg-red-500 text-white p-2 rounded"
+          onClick={handleFetchReports}
+          className="bg-blue-500 text-white p-2 rounded"
         >
-          Reset Filter
+          Fetch Reports
         </button>
-      </div> */}
+      </div>
+
+      {showNoReportsMessage && (
+        <p className="text-center text-red-500">No reports found for the year {year}.</p>
+      )}
 
       {Object.entries(filteredGroupedBookings).map(([month, bookings]) => (
         <div key={month} className="mb-4"> 
-          <h2 className="text-xl text-[#9b2f2f] mb-2">For the Month of {month} :</h2>
+          <h2 className="text-xl text-[#9b2f2f] mb-2">For the Month of: {month}</h2>
           
           <div className="overflow-auto max-h-60"> {/* Set a fixed height and enable scroll */}
             <table className="min-w-full bg-white border border-gray-200">

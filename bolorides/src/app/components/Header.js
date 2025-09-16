@@ -3,7 +3,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -17,6 +17,23 @@ export default function Header() {
     router.push('/'); 
   };
 
+  const toggleDropdown = () => {
+    setShowDropdown(prev => !prev);
+  };
+
+  useEffect(() => {
+    let timer;
+    if (showDropdown) {
+      // Set a timer to hide the dropdown after 3 seconds
+      timer = setTimeout(() => {
+        setShowDropdown(false);
+      }, 3000);
+    }
+
+    // Clear the timer if the dropdown is closed or component unmounts
+    return () => clearTimeout(timer);
+  }, [showDropdown]);
+
   return (
     <header className="relative p-2 sm:p-2 flex items-center justify-between gap-4 z-20">
       <div className="car-logo flex items-center gap-1">
@@ -27,7 +44,7 @@ export default function Header() {
       </div>
       <div className="accounts relative">
         <button 
-          onClick={() => setShowDropdown(!showDropdown)} 
+          onClick={toggleDropdown} 
           className="px-4 py-2 rounded"
         >
           User Accounts

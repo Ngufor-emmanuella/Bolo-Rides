@@ -11,7 +11,6 @@ import InviteUser from './inviteUser';
 import { useRouter } from 'next/navigation'; 
 import { useSearchParams } from 'next/navigation';
 
-
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
     const [admins, setAdmins] = useState([]);
@@ -29,14 +28,13 @@ const AdminDashboard = () => {
     const [processing, setProcessing] = useState(false);
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [showBookingHistory, setShowBookingHistory] = useState(false); 
+    const [showBookingHistory, setShowBookingHistory] = useState(true); // Default to true to show booking history
 
     const searchParams = useSearchParams();
     
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
     const router = useRouter(); 
 
-    
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -48,10 +46,7 @@ const AdminDashboard = () => {
                 const allAdmins = usersList.filter(user => user.role === 'admin' || user.role === 'supreme');
                 setAdmins(allAdmins.sort((a, b) => (a.role === 'supreme' ? -1 : 1)));
 
-                // Get userId from the query params
-                
                 const userId = searchParams.get('userId');
-
                 if (userId) {
                     const loggedInUser = usersList.find(user => user.id === userId);
                     if (loggedInUser) {
@@ -81,8 +76,10 @@ const AdminDashboard = () => {
         setSelectedCarId(carId);
         setSelectedCarName(carName);
         setSelectedUserName(userName);
-        setShowReports(false);
-        setViewingMonthlyReport(false);
+        setShowReports(true); // Show reports for the selected car
+        setShowBookingHistory(false); // Close booking history if open
+        fetchReports(carId); // Fetch reports for the selected car
+        setSidebarOpen(false); // Close the sidebar
     };
 
     const fetchReports = async (carId) => {
@@ -101,6 +98,11 @@ const AdminDashboard = () => {
             setShowReports(prev => !prev);
             setViewingMonthlyReport(false); 
         }
+    };
+
+    const handleViewBookingHistory = () => {
+        setShowBookingHistory(true);
+        setSidebarOpen(false); // Close sidebar when viewing booking history
     };
 
     const handleViewMonthlyReports = () => {
@@ -159,6 +161,9 @@ const AdminDashboard = () => {
 
     const toggleBookingHistory = () => {
         setShowBookingHistory(prev => !prev);
+        if (!showBookingHistory) {
+            setSidebarOpen(false); // Close sidebar when opening booking history
+        }
     };
 
     if (loading) return <div>Loading...</div>;
@@ -191,9 +196,9 @@ const AdminDashboard = () => {
                 <hr />
                 <br />
 
-                 {/* Button to toggle booking history */}
-                 <button 
-                    onClick={toggleBookingHistory} 
+                {/* Button to toggle booking history */}
+                <button 
+                    onClick={handleViewBookingHistory} 
                     className="mt-4 bg-[#9b2f2b] text-white p-2 rounded w-full"
                 >
                     {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
@@ -287,10 +292,7 @@ const AdminDashboard = () => {
                                     />
                                 </div>
 
-                                {/* Show UserReports if selected */}
                                 {showReports && <UserReports reports={reports} />}
-                                
-                                {/* Show MonthlyReport if selected */}
                                 {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} year={reportYear} />}
                             </div>
                         )}

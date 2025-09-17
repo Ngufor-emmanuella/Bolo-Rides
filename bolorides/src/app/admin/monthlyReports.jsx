@@ -75,6 +75,10 @@ const MonthlyReport = ({ carId, year }) => {
         return monthlyAggregation;
     };
 
+    const formatNumber = (num) => {
+        return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
@@ -84,7 +88,7 @@ const MonthlyReport = ({ carId, year }) => {
     return (
         <div className="mt-4 p-4">
             <h3 className="text-lg font-semibold">Monthly Goals Reports for {year}</h3>
-            <h5 className="mb-4">Monthly Target Goal: {monthlyTargetGoal.toLocaleString()} CFA</h5>
+            <h5 className="mb-4">Monthly Target Goal: {formatNumber(monthlyTargetGoal)} CFA</h5>
             <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse border border-gray-200">
                     <thead>
@@ -116,20 +120,20 @@ const MonthlyReport = ({ carId, year }) => {
                                     <td className="border border-gray-300 p-2">
                                         {new Date(year, index).toLocaleString('default', { month: 'long' })}
                                     </td>
-                                    <td className="border border-gray-300 p-2">{(data.totalAmountDue || 0).toFixed(2)}</td>
-                                    <td className="border border-gray-300 p-2">{(data.managementFee || 0).toFixed(2)}</td>
-                                    <td className="border border-gray-300 p-2">{(data.totalDriverIncome || 0).toFixed(2)}</td>
-                                    <td className="border border-gray-300 p-2">{(data.totalCarExpenses || 0).toFixed(2)}</td>
-                                    <td className="border border-gray-300 p-2">{(data.totalPaidAmount || 0).toFixed(2)}</td>
-                                    <td className="border border-gray-300 p-2">{(data.balanceAmountDue || 0).toFixed(2)}</td>
-                                    <td className="border border-gray-300 p-2">{(data.netIncome || 0).toFixed(2)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.totalAmountDue || 0)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.managementFee || 0)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.totalDriverIncome || 0)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.totalCarExpenses || 0)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.totalPaidAmount || 0)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.balanceAmountDue || 0)}</td>
+                                    <td className="border border-gray-300 p-2">{formatNumber(data.netIncome || 0)}</td>
                                 </tr>
                             );
                         })}
                     </tbody>
                 </table>
             </div>
-            <h3 className="text-lg font-semibold mt-4">Total Yearly Rentals: {totalYearlyRentals.toFixed(2)} CFA</h3>
+            <h3 className="text-lg font-semibold mt-4">Total Yearly Rentals: {formatNumber(totalYearlyRentals)} CFA</h3>
             <h4 className="text-md">Percentage of Goal: {percentageOfGoal.toFixed(2)}%</h4>
         </div>
     );

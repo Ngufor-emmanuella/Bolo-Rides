@@ -5,8 +5,8 @@ import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 // Helper function to format numbers with commas
 const formatNumber = (num) => {
     if (num === null || num === undefined) return 'N/A';
-    const numberValue = Number(num); // Ensure the value is treated as a number
-    if (isNaN(numberValue)) return 'N/A'; // Handle NaN values
+    const numberValue = Number(num); 
+    if (isNaN(numberValue)) return 'N/A'; 
     return numberValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
@@ -107,7 +107,7 @@ const AllDailyReports = ({ carId, userId }) => {
                                 ))}
                             </tbody>
                         </table>
-                        <div className="h-2 bg-[#9b2f2b] rounded-b-md"></div> {/* Horizontal scrollbar indicator */}
+                        <div className="h-2 bg-[#9b2f2b] rounded-b-md"></div>
                     </div>
                 </div>
             ) : (

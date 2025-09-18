@@ -124,7 +124,7 @@ const ViewBookingHistory = () => {
             <table className="min-w-full bg-white border border-gray-200">
               <thead className="bg-[#9b2f2f] text-white">
                 <tr>
-                  <th className="border border-gray-300 p-2">Created At</th>
+                  {/* <th className="border border-gray-300 p-2">Created At</th> */}
                   <th className="border border-gray-300 p-2">Car Name</th>
                   <th className="border border-gray-300 p-2">Car Type</th>
                   <th className="border border-gray-300 p-2">Destination</th>
@@ -137,7 +137,7 @@ const ViewBookingHistory = () => {
               <tbody>
                 {bookings.map(booking => (
                   <tr key={booking.id}>
-                    <td className="border border-gray-300 p-2">{new Date(booking.createdAt).toLocaleDateString()}</td>
+                    {/* <td className="border border-gray-300 p-2">{new Date(booking.createdAt).toLocaleDateString()}</td> */}
                     <td className="border border-gray-300 p-2">{booking.carName}</td>
                     <td className="border border-gray-300 p-2">{booking.carType}</td>
                     <td className="border border-gray-300 p-2">{booking.destination}</td>

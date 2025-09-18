@@ -39,7 +39,7 @@ export default function Header() {
       <div className="car-logo flex items-center gap-1">
         <Image src="/assets/bolo-logo1.jpeg" alt="Logo" width={100} height={100} />
         <h1 className="logo-header text-base sm:text-lg">
-          <Link href="/">Bolo Rides</Link>
+          <Link href="/">Bolo Ridess</Link>
         </h1>
       </div>
       <div className="accounts relative">

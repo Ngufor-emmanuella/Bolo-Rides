@@ -25,7 +25,8 @@ const UserDashboard = () => {
     const [showAddCarForm, setShowAddCarForm] = useState(false);
     const [showTransactionForm, setShowTransactionForm] = useState(false);
     const [showDailyReports, setShowDailyReports] = useState(false);
-    const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
+    const initialTransactionState = [{ type: 'revenue', data: {} }];
+    const [transactions, setTransactions] = useState(initialTransactionState);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [userRole, setUserRole] = useState('');
 
@@ -49,10 +50,9 @@ const UserDashboard = () => {
                     const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setCars(carList);
 
-                    // Set the first car as the active car if available
                     if (carList.length > 0) {
                         setActiveCarId(carList[0].id);
-                        setShowTransactionForm(true); // Automatically show the transaction form
+                        setShowTransactionForm(true);
                     }
                 } catch (e) {
                     console.error("Error fetching user data:", e);
@@ -133,10 +133,10 @@ const UserDashboard = () => {
 
     const handleCarSelect = (car) => {
         setActiveCarId(car.id);
-        setShowTransactionForm(true); // Show the transaction form immediately
+        setShowTransactionForm(true);
         setShowDailyReports(false);
-        setTransactions([{ type: 'revenue', data: {} }]);
-        setSidebarOpen(false); // Close the sidebar
+        setTransactions(initialTransactionState);
+        setSidebarOpen(false);
     };
 
     const handleAddTransaction = () => {
@@ -163,6 +163,13 @@ const UserDashboard = () => {
         try {
             await addDoc(collection(db, 'DailyReports'), reportData);
             setSuccess('Report submitted successfully!');
+            setTransactions(initialTransactionState); // Reset immediately on success
+            
+            // After 1 minute (60000ms), reset form again to ensure any lingering data is cleared
+            setTimeout(() => {
+                setTransactions(initialTransactionState);
+            }, 60000);
+            
         } catch (error) {
             console.error('Error adding report:', error.message);
             setError('Error adding report: ' + error.message);
@@ -204,7 +211,6 @@ const UserDashboard = () => {
                             </li>
                         ))}
 
-                        {/* Button to access admin dashboard */}
                         {userRole === 'admin' || userRole === 'supreme' ? (
                             <button
                                 onClick={() => router.push(`/admin?userId=${encodeURIComponent(user.uid)}`)}
@@ -239,26 +245,6 @@ const UserDashboard = () => {
                                 required
                                 className="border p-2 mb-2 w-full"
                             />
-                            {/* Image Uploads of car  */}
-                            {/* <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(0, e)}
-                                className="border p-2 mb-2 w-full"
-                            /> */}
-                            {/* <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(1, e)}
-                                className="border p-2 mb-2 w-full"
-                            /> */}
-                            {/* <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(2, e)}
-                                className="border p-2 mb-2 w-full"
-                            /> */}
-
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
                             {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
                             {success && <p className="mt-2 text-green-500">{success}</p>}

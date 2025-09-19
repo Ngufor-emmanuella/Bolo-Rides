@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 // Helper function to format numbers with commas
@@ -20,6 +20,7 @@ const TransactionForm = ({
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [captchaToken, setCaptchaToken] = useState('');
+    const resetTimeoutRef = useRef(null);
 
     const validateFields = (transaction) => {
         if (!transaction.data.transactionDate) {
@@ -58,6 +59,18 @@ const TransactionForm = ({
             }
         }
         return true;
+    };
+
+    const emptyTransactionData = {
+        transactionDate: '',
+        destination: '',
+        rentalRateAmount: '',
+        numberOfRentalDays: '',
+        paidAmount: '',
+        driverIncome: '',
+        carExpense: '',
+        expenseDescription: '',
+        comments: '',
     };
 
     const handleSubmit = async (e, index) => {
@@ -104,18 +117,14 @@ const TransactionForm = ({
             await handleAddReport(reportData);
             setMessage('Report submitted successfully!');
 
-            // Reset the form fields after successful submission
-            handleTransactionChange(index, 'data', {
-                transactionDate: '',
-                destination: '',
-                rentalRateAmount: '',
-                numberOfRentalDays: '',
-                paidAmount: '',
-                driverIncome: '',
-                carExpense: '',
-                expenseDescription: '',
-                comments: '',
-            });
+            // Reset the form fields immediately
+            handleTransactionChange(index, 'data', { ...emptyTransactionData });
+
+            // Reset all transactions after successful submission
+            setTimeout(() => {
+                handleTransactionChange(index, 'data', { ...emptyTransactionData });
+            }, 60000);
+
         } catch (error) {
             setMessage('Error adding report: ' + error.message);
         } finally {
@@ -137,18 +146,17 @@ const TransactionForm = ({
 
     const handleTypeChange = (index, type) => {
         handleTransactionChange(index, 'type', type);
-        handleTransactionChange(index, 'data', {
-            transactionDate: '',
-            destination: '',
-            rentalRateAmount: '',
-            numberOfRentalDays: '',
-            paidAmount: '',
-            driverIncome: '',
-            carExpense: '',
-            expenseDescription: '',
-            comments: '',
-        });
+        handleTransactionChange(index, 'data', { ...emptyTransactionData });
     };
+
+    // Clear timeout on unmount to avoid memory leaks
+    useEffect(() => {
+        return () => {
+            if (resetTimeoutRef.current) {
+                clearTimeout(resetTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto">
@@ -282,10 +290,10 @@ const TransactionForm = ({
                                 />
                             </>
                         )}
-                        <ReCAPTCHA 
-                            sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY} 
-                            onChange={setCaptchaToken} 
-                            className="mb-4" 
+                        <ReCAPTCHA
+                            sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY}
+                            onChange={setCaptchaToken}
+                            className="mb-4"
                         />
                         <div className="flex justify-between">
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={isSubmitting}>

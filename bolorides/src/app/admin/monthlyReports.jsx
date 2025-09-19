@@ -4,13 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
-const MonthlyReport = ({ carId }) => {
+const MonthlyReport = ({ carId, carName }) => {
     const [monthlyData, setMonthlyData] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [year, setYear] = useState(new Date().getFullYear()); // Default to current year
-    const [showNoReportsMessage, setShowNoReportsMessage] = useState(false); // State for showing no reports message
+    const [year, setYear] = useState(new Date().getFullYear());
+    const [showNoReportsMessage, setShowNoReportsMessage] = useState(false);
     const monthlyTargetGoal = 1000000;
+    const DEFAULT_DRIVER_SALARY = 50000;
+
+    console.log('Car Name:', carName); // Check carName prop
 
     // This useEffect will only fetch data for the current year initially
     useEffect(() => {
@@ -42,7 +45,12 @@ const MonthlyReport = ({ carId }) => {
         };
 
         fetchReports();
-    }, [carId]); // Only fetch when carId changes
+    }, [carId, year]); // Only fetch when carId or year changes
+
+    // Function to get the driver salary based on car name
+    const getDriverSalary = (carName) => {
+        return (typeof carName === 'string' && carName.trim() === 'Rav4') ? 0 : DEFAULT_DRIVER_SALARY; 
+    };
 
     const aggregateReportsByMonth = (reports) => {
         const monthlyAggregation = {};
@@ -55,16 +63,16 @@ const MonthlyReport = ({ carId }) => {
                 totalDriverIncome: 0,
                 totalCarExpenses: 0,
                 totalPaidAmount: 0,
-                driverSalary: 50000,
+                driverSalary: getDriverSalary(carName), // Set the driver salary correctly
                 netIncome: 0,
             };
+            console.log('Driver Salary for', carName, ':', monthlyAggregation[monthKey].driverSalary); 
         }
 
         reports.forEach(report => {
             const date = new Date(report.transactionDate);
-            const month = date.getMonth() + 1; 
-            const monthKey = `${year}-${month}`; 
-
+            const month = date.getMonth() + 1;
+            const monthKey = `${year}-${month}`;
             monthlyAggregation[monthKey].totalAmountDue += report.amountDue || 0;
             monthlyAggregation[monthKey].totalDriverIncome += report.driverIncome || 0;
             monthlyAggregation[monthKey].totalCarExpenses += report.carExpense || 0;
@@ -74,8 +82,15 @@ const MonthlyReport = ({ carId }) => {
         for (const monthKey in monthlyAggregation) {
             const monthData = monthlyAggregation[monthKey];
             monthData.managementFee = monthData.totalAmountDue * 0.10;
-            monthData.totalExpenses = monthData.totalDriverIncome + monthData.totalCarExpenses + monthData.managementFee + monthData.driverSalary;
-            monthData.netIncome = monthData.totalAmountDue - monthData.totalExpenses;
+
+            // Calculate total expenses
+            const baseExpenses = monthData.totalDriverIncome + monthData.totalCarExpenses + monthData.managementFee;
+            monthData.totalExpenses = baseExpenses + monthData.driverSalary; // Add driver salary
+
+            const netInc = monthData.totalAmountDue - monthData.totalExpenses;
+
+            // Set net income to 0 if the car name is Rav4 and net income is negative
+            monthData.netIncome = (carName && carName.trim() === 'Rav4' && netInc < 0) ? 0 : netInc;
         }
 
         return monthlyAggregation;
@@ -87,12 +102,12 @@ const MonthlyReport = ({ carId }) => {
 
     const handleYearChange = (event) => {
         setYear(event.target.value);
-        setShowNoReportsMessage(false); // Reset the message when changing the year
+        setShowNoReportsMessage(false); 
     };
 
     const handleFetchReports = async () => {
         setLoading(true);
-        setShowNoReportsMessage(false); // Reset the message before fetching
+        setShowNoReportsMessage(false);
 
         try {
             const reportsCollection = collection(db, 'DailyReports');
@@ -194,6 +209,12 @@ const MonthlyReport = ({ carId }) => {
             </div>
             <h3 className="text-lg font-semibold mt-4">Total Yearly Rentals: {formatNumber(totalYearlyRentals)} CFA</h3>
             <h4 className="text-md">Percentage of Goal: {percentageOfGoal.toFixed(2)}%</h4>
+            <br />
+            <h4 className="text-md">Note for each Month;</h4>
+            <h6>The values for total amount due is calculated and displayed.</h6>
+            <h6>The Total management fee is 10% of the total amount due.</h6>
+            <h6>The Balance amount due is the difference between the Total amount due and the Total paid amount</h6>
+            <h6>The Net income is the difference between the Total amount due and the Total expenses, (including 50k salary, except for Rav4) </h6>
         </div>
     );
 };

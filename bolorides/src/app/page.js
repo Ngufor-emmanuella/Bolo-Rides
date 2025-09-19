@@ -229,7 +229,7 @@ export default function HomePage() {
             <div className="w-full md:w-1/4 mb-6 text-center md:text-left">
               <Link href="/">
                 <Image
-                  src="/assets/bolo-logo1.jpeg"
+                  src="/assets/bolo_log.jpeg"
                   alt="Bolo Rides Logo"
                   width={100}
                   height={100}

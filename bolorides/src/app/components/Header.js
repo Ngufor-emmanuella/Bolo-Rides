@@ -37,7 +37,7 @@ export default function Header() {
   return (
     <header className="relative p-2 sm:p-2 flex items-center justify-between gap-4 z-20">
       <div className="car-logo flex items-center gap-1">
-        <Image src="/assets/bolo-logo1.jpeg" alt="Logo" width={100} height={100} />
+        <Image src="/assets/bolo_log.jpeg" alt="Logo" width={100} height={100} />
         <h1 className="logo-header text-base sm:text-lg">
           <Link href="/">Bolo Ridess</Link>
         </h1>

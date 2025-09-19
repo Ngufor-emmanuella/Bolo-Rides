@@ -23,11 +23,15 @@ const AllDailyReports = ({ carId, userId }) => {
                     collection(db, 'DailyReports'),
                     where('carId', '==', carId),
                     where('userId', '==', userId),
-                    orderBy('createdAt', 'desc')
+                    orderBy('createdAt', 'desc') // Fetch most recent reports first
                 );
                 
                 const reportSnapshot = await getDocs(reportQuery);
                 const reportList = reportSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Sorting by transactionDate in descending order (most recent first)
+                reportList.sort((a, b) => new Date(b.transactionDate) - new Date(a.transactionDate));
+
                 setReports(reportList);
             } catch (error) {
                 console.error('Error fetching reports:', error);

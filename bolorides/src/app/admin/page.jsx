@@ -364,7 +364,7 @@ const AdminDashboard = () => {
                                     </button>
                                 </div>
                                 {showReports && <UserReports reports={reports} />}
-                                {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} year={reportYear} />}
+                                {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} carName={selectedCarName} year={reportYear} />}
                             </div>
                         )}
                         {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}

@@ -184,7 +184,7 @@ const UserDashboard = () => {
 
     return (
         <div>
-            <header className="flex justify-center items-center p-4">
+            <header className="flex justify-center items-center p-4 pt-20">
                 <h1 className="text-2xl text-center mt-5">Welcome, {userName || user?.email}!</h1>
                 <button
                     className="md:hidden p-2 mt-5 text-white bg-[#9b2f2b] rounded z-50 ml-4"
@@ -201,7 +201,7 @@ const UserDashboard = () => {
                     <h2 className="text-xl font-bold">My Cars.</h2>
                     <ul>
                         {cars.map(car => (
-                            <li key={car.id} className="my-2">
+                            <li key={car.id} className="my-2 mt-7">
                                 <button
                                     className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2b] text-white' : 'bg-blue-500 text-white'}`}
                                     onClick={() => handleCarSelect(car)}

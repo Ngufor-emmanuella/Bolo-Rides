@@ -250,17 +250,23 @@ const MonthlyReport = ({ carId, carName }) => {
       </h4>
       <br />
       <h4 className="text-md">Note for each Month;</h4>
-      <h6>The values for total amount due is calculated and displayed.</h6>
-      <h6>The Total management fee is 10% of the total amount due.</h6>
-      <h6>
-        The Balance amount due is the difference between the Total amount due
-        and the Total paid amount.
-      </h6>
-      <h6>
-        The Net income is the difference between the Total amount due and the
-        Total expenses, (including 50k salary, except for Rav4 which uses 0
-        salary).
-      </h6>
+
+      <ul style={{ listStyleType: 'disc', padding: 0, margin: 0 }}>
+        <li style={{ marginBottom: '10px' }}>
+          The values for total amount due is calculated and displayed.
+        </li>
+        <li style={{ marginBottom: '10px' }}>
+          The Total management fee is 10% of the total amount due.
+        </li>
+        <li style={{ marginBottom: '10px' }}>
+          The Balance amount due is the difference between the Total amount due and the Total paid amount.
+        </li>
+        <li style={{ marginBottom: '10px' }}>
+          The Net income is the difference between the Total amount due and the Total expenses, (including 50k salary, except for Rav4 whose salary is 0).
+        </li>
+      </ul>
+    
+      <br/>
     </div>
   );
 };

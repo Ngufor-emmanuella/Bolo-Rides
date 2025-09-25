@@ -28,7 +28,7 @@ const AdminDashboard = () => {
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [showBookingHistory, setShowBookingHistory] = useState(true);
-    const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const searchParams = useSearchParams();
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
     const router = useRouter();
@@ -162,18 +162,13 @@ const AdminDashboard = () => {
         }
         setProcessing(true);
         try {
-            // Delete the car document
             await deleteDoc(doc(db, 'Cars', carId));
 
-            // Delete all related daily reports for that carId
             const reportsQuery = query(collection(db, 'DailyReports'), where('carId', '==', carId));
             const reportsSnapshot = await getDocs(reportsQuery);
             await Promise.all(reportsSnapshot.docs.map(reportDoc => deleteDoc(doc(db, 'DailyReports', reportDoc.id))));
 
-            // Refetch users to update state
             await refetchUsers();
-
-            // Reset selections to show the default dashboard
             resetSelections();
 
             setMessage('Car and associated reports deleted successfully!');
@@ -213,18 +208,18 @@ const AdminDashboard = () => {
 
     const handleDeleteCarClick = (carId) => {
         setSelectedCarId(carId);
-        setShowDeleteModal(true); // Show the delete confirmation modal
+        setShowDeleteModal(true);
     };
 
     const confirmDeleteCar = () => {
         if (selectedCarId) {
             deleteCar(selectedCarId);
-            setShowDeleteModal(false); // Close the modal after deletion
+            setShowDeleteModal(false);
         }
     };
 
     const cancelDeleteCar = () => {
-        setShowDeleteModal(false); // Close the modal without deleting
+        setShowDeleteModal(false);
     };
 
     const toggleBookingHistory = () => {
@@ -240,9 +235,9 @@ const AdminDashboard = () => {
     return (
         <div className="flex flex-col md:flex-row">
             {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-4/5 pt-23 md:pt-4 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-2/6`}>
+            <aside className={`fixed inset-y-0 left-0 w-4/5 md:w-1/4 lg:w-1/5 bg-gray-200 p-4 overflow-y-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static`}>
                 {currentUser ? (
-                    <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, {currentUser.name}!</h1>
+                    <h1 className="text-xl text-[#9b2f2b] mb-4 mt-20">Welcome, {currentUser.name}!</h1>
                 ) : (
                     <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, Supreme Admin!</h1>
                 )}
@@ -260,14 +255,12 @@ const AdminDashboard = () => {
                 <br />
                 <hr />
                 <br />
-                {/* Button to toggle booking history */}
-                <button 
+                {/* <button 
                     onClick={handleViewBookingHistory} 
                     className="mt-4 bg-[#9b2f2b] text-white p-2 rounded w-full"
                 >
                     {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
-                </button>
-                {/* button to return to driver's account */}
+                </button> */}
                 {currentUser?.role === 'admin' && (
                     <button
                         onClick={() => {
@@ -308,7 +301,6 @@ const AdminDashboard = () => {
                                     Remove Admin
                                 </button>
                             )}
-                            {/* Render delete car button only for admin and supreme users */}
                             {(currentUser?.role === 'admin' || currentUser?.role === 'supreme') && selectedCarId && selectedUserName === user.name && (
                                 <button 
                                     onClick={() => handleDeleteCarClick(selectedCarId)} 
@@ -331,8 +323,8 @@ const AdminDashboard = () => {
                 ))}
             </aside>
             <main className="flex-1 p-4">
-                <div className="flex items-center justify-center mb-4">
-                    <h1 className="text-2xl text-[#9b2f2b] pr-3">Admin Dashboard</h1>
+                <div className="flex items-center justify-center mb-2 pt-20 ">
+                    <h1 className="text-2xl text-[#9b2f2b] pr-3 ">Admin Dashboard</h1>
                     
                     <button 
                         className="md:hidden p-2 text-white bg-[#9b2f2b] rounded z-50 mr-8"

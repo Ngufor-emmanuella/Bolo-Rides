@@ -1,4 +1,5 @@
 'use client';
+
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -14,7 +15,7 @@ export default function Header() {
 
   const handleLogout = () => {
     signOut(auth);
-    router.push('/'); 
+    router.push('/');
   };
 
   const toggleDropdown = () => {
@@ -35,7 +36,7 @@ export default function Header() {
   }, [showDropdown]);
 
   return (
-    <header className="relative p-2 sm:p-2 flex items-center justify-between gap-4 z-20">
+    <header className="fixed top-0 left-0 right-0 bg-white p-2 sm:p-2 flex items-center justify-between gap-4 z-20 shadow">
       <div className="car-logo flex items-center gap-1">
         <Image src="/assets/bolo_log.jpeg" alt="Logo" width={100} height={100} />
         <h1 className="logo-header text-base sm:text-lg">

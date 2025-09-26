@@ -235,7 +235,9 @@ const AdminDashboard = () => {
     return (
         <div className="flex flex-col md:flex-row">
             {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-4/5 md:w-1/4 lg:w-1/5 bg-gray-200 p-4 overflow-y-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static`}>
+            <aside className={`fixed inset-y-0 left-0 w-4/5 md:[width:calc(1.2/5*100%)] bg-gray-200 p-4 
+            overflow-y-auto md:overflow-y-visible /* vertical scroll only on mobile */flow-x-hidden /* removes horizontal scrollbar on desktop */
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static`}>
                 {currentUser ? (
                     <h1 className="text-xl text-[#9b2f2b] mb-4 mt-20">Welcome, {currentUser.name}!</h1>
                 ) : (
@@ -245,7 +247,7 @@ const AdminDashboard = () => {
                 <br />
                 <hr />
                 <br />
-                <h3 className="text-xl mb-2">List Of All Admins</h3>
+                <h3 className="text-[#9b2f2b] text-xl mb-2">List Of All Admins</h3>
                 {admins.map(admin => (
                     <div key={admin.id} className="mb-2">
                         <span>{admin.name} ({admin.email})</span>
@@ -254,13 +256,8 @@ const AdminDashboard = () => {
                 
                 <br />
                 <hr />
-                <br />
-                {/* <button 
-                    onClick={handleViewBookingHistory} 
-                    className="mt-4 bg-[#9b2f2b] text-white p-2 rounded w-full"
-                >
-                    {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
-                </button> */}
+               
+            
                 {currentUser?.role === 'admin' && (
                     <button
                         onClick={() => {
@@ -273,7 +270,7 @@ const AdminDashboard = () => {
                 )}
                 <br />
                 <br />
-                <h3 className="text-xl mb-2">List Of All Users</h3>
+                <h3 className="text-[#9b2f2b] text-xl mb-2">List Of All Users</h3>
                 {users.map(user => (
                     <div key={user.id} className="mb-2">
                         <div className="flex justify-between items-center">
@@ -382,4 +379,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default AdminDashboard

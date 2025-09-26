@@ -6,6 +6,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { db } from './firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function HomePage() {
     const [user] = useAuthState(auth);
@@ -101,14 +103,32 @@ export default function HomePage() {
                         <Link className="header-btn inline-block mb-6" href="/bookingsPage">Book Us Now!!</Link>
 
                         {/* Show this only if the user is signed in */}
-                        {/* {user && (
-                            <button
-                                onClick={() => router.push('/dashboard')}
-                                className="mt-4 bg-green-500 text-white p-2 rounded w-full"
+                        {user && (
+                           <button
+                            onClick={async () => {
+                                try {
+                                    const userDoc = await getDoc(doc(db, 'Users', user.uid));
+                                    if (userDoc.exists()) {
+                                        const userData = userDoc.data();
+                                        const role = userData.role;
+
+                                        if (role === 'supreme') {
+                                            router.push('/admin');
+                                        } else {
+                                            router.push(`/dashboard/${user.uid}`);
+                                        }
+                                    } else {
+                                        console.error("User not found in Firestore");
+                                    }
+                                } catch (err) {
+                                    console.error("Error fetching user role:", err);
+                                }
+                            }}
+                            className="dash-button"
                             >
-                                Go to Dashboard
-                            </button>
-                        )} */}
+                            Go to Dashboard
+                        </button>
+                        )}
 
                         {showDropdown && (
                             <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-20">

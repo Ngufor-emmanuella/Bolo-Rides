@@ -235,9 +235,11 @@ const AdminDashboard = () => {
     return (
         <div className="flex flex-col md:flex-row">
             {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-4/5 md:[width:calc(1.2/5*100%)] bg-gray-200 p-4 
-            overflow-y-auto md:overflow-y-visible /* vertical scroll only on mobile */flow-x-hidden /* removes horizontal scrollbar on desktop */
+            <aside className={`fixed inset-y-0 left-0 w-4/5 md:w-auto md:min-w-[calc(1.7/5*100%)] bg-gray-200 p-4 
+            overflow-y-auto md:overflow-y-visible /* vertical scroll only on mobile */ 
+            flow-x-hidden /* removes horizontal scrollbar on desktop */
             ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static`}>
+                
                 {currentUser ? (
                     <h1 className="text-xl text-[#9b2f2b] mb-4 mt-20">Welcome, {currentUser.name}!</h1>
                 ) : (
@@ -283,7 +285,7 @@ const AdminDashboard = () => {
                             {user.role === 'user' && (
                                 <button 
                                     onClick={() => promoteUserToAdmin(user.id)} 
-                                    className="ml-2 bg-[#9b2f2b] text-white p-1 rounded"
+                                    className=" bg-[#9b2f2b] text-white p-1 rounded"
                                     disabled={processing}
                                 >
                                     Promote to Admin

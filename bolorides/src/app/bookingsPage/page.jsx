@@ -14,7 +14,7 @@ export default function BookingsPage() {
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeView, setActiveView] = useState('cars'); 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -50,17 +50,20 @@ export default function BookingsPage() {
 
   const handleNavLinkClick = (view) => {
     setActiveView(view);
-    setIsSidebarOpen(false); // Close the sidebar on nav link click
+    setIsSidebarOpen(false); 
   };
 
   return (
-    <div className="flex">
+    <div className="flex justify-end">
       <button 
-        className="md:hidden p-2 text-white bg-[#9b2f2f] rounded fixed z-10 top-5 left-2"
-        onClick={toggleSidebar}
+         className="absolute left-2 mt-15 p-2 text-white bg-[#9b2f2b] h-20" onClick={toggleSidebar}
       >
         {isSidebarOpen ? '✖' : '☰'}
       </button>
+
+      {/* <button className="md:hidden p-2 mt-5 text-white bg-[#9b2f2b] rounded z-50 ml-4"
+       onClick={() => setSidebarOpen(!sidebarOpen)}> {sidebarOpen ? 'X' : '☰'}
+      </button> */}
 
       <Sidebar 
         onSelect={handleNavLinkClick} 
@@ -69,8 +72,8 @@ export default function BookingsPage() {
         onClose={() => setIsSidebarOpen(false)} // Pass the close function
       />
 
-      <main className={`flex-1 p-4 ${isSidebarOpen ? 'ml-64' : ''}`}>
-        <h1 className="text-4xl text-[#9b2f2b] font-bold mb-4">
+      <main className={`flex-1 p-4 mt-20 ${isSidebarOpen ? 'ml-64' : ''}`}>
+        <h1 className="text-4xl text-[#9b2f2b] ml-10 font-bold mb-4">
           {activeView === 'cars' ? 'Available Cars' : activeView === 'bookings' ? 'Rental Bookings' : 'Rental Calendar'}
         </h1>
         {error && <p className="text-red-500">{error}</p>}

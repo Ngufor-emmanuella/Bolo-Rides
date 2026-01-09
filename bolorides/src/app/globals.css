@@ -131,16 +131,17 @@ body {
   font-size: 16px;
 }
 
-.sign-background {
+/* .sign-background {
   background-color: #9b2f2f;
-}
+} */
 
 .signup {
-  background-color: #ffffff;
   color: #9b2f2f;
   font-weight: 700;
   font-size: 16px;
+  margin-top: 10%;
 }
+
 
 .signup h1 {
   font-weight: 700;

@@ -56,9 +56,9 @@ export default function BookingsPage() {
   return (
     <div className="flex justify-end">
       <button 
-         className="absolute left-2 mt-15 p-2 text-white bg-[#9b2f2b] h-20" onClick={toggleSidebar}
+         className="absolute left-2 mt-15 p-2 text-[#9b2f2b] h-27 text-[2rem]" onClick={toggleSidebar}
       >
-        {isSidebarOpen ? '✖' : '☰'}
+        {isSidebarOpen ? '✖' : '->'}
       </button>
 
       {/* <button className="md:hidden p-2 mt-5 text-white bg-[#9b2f2b] rounded z-50 ml-4"

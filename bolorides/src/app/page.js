@@ -99,35 +99,39 @@ export default function HomePage() {
                     <h2 className="header-text text-white text-2xl md:text-3xl font-bold mb-4">BOLO CAR RENTALS</h2>
                     <h5 className="header-add text-white text-lg md:text-xl font-bold mb-6">THE BEST CAR RENTALS IN CAMEROON!</h5>
 
-                    <div className="relative">
-                        <Link className="header-btn inline-block mb-6" href="/bookingsPage">Book Us Now!!</Link>
+                    {/* button code */}
+
+                    <div className="relative flex justify-center items-center space-x-4">
+                        <Link className="header-btn" href="/bookingsPage">
+                            Book Us Now!!
+                        </Link>
 
                         {/* Show this only if the user is signed in */}
                         {user && (
-                           <button
-                            onClick={async () => {
-                                try {
-                                    const userDoc = await getDoc(doc(db, 'Users', user.uid));
-                                    if (userDoc.exists()) {
-                                        const userData = userDoc.data();
-                                        const role = userData.role;
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        const userDoc = await getDoc(doc(db, 'Users', user.uid));
+                                        if (userDoc.exists()) {
+                                            const userData = userDoc.data();
+                                            const role = userData.role;
 
-                                        if (role === 'supreme') {
-                                            router.push('/admin');
+                                            if (role === 'supreme') {
+                                                router.push('/admin');
+                                            } else {
+                                                router.push(`/dashboard/${user.uid}`);
+                                            }
                                         } else {
-                                            router.push(`/dashboard/${user.uid}`);
+                                            console.error("User not found in Firestore");
                                         }
-                                    } else {
-                                        console.error("User not found in Firestore");
+                                    } catch (err) {
+                                        console.error("Error fetching user role:", err);
                                     }
-                                } catch (err) {
-                                    console.error("Error fetching user role:", err);
-                                }
-                            }}
-                            className="dash-button"
+                                }}
+                                className="dash-button"
                             >
-                            Go to Dashboard
-                        </button>
+                                Go to Dashboard
+                            </button>
                         )}
 
                         {showDropdown && (

@@ -1,5 +1,6 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap');
+@import "tailwindcss";
+
 
 @theme {
   --font-sans: var(--font-geist-sans);
@@ -24,9 +25,6 @@ body {
   padding: 0;
   box-sizing: border-box;
 }
-
-
-
 
 .card {
   display: flex;
@@ -89,6 +87,17 @@ body {
   width: 45%;
 }
 
+.dash-button {
+  font-size: 19px;
+  background-color: #9b2f2f;
+  color: #ffffff;
+  padding: 3%;
+  font-weight: 700;
+  border-radius: 10px;
+  width: 45%;
+  margin-left: 5%;
+}
+
 .card-title {
   font-weight: 700;
   font-size: 18px;
@@ -123,16 +132,17 @@ body {
   font-size: 16px;
 }
 
-.sign-background {
+/* .sign-background {
   background-color: #9b2f2f;
-}
+} */
 
 .signup {
-  background-color: #ffffff;
   color: #9b2f2f;
   font-weight: 700;
   font-size: 16px;
+  margin-top: 10%;
 }
+
 
 .signup h1 {
   font-weight: 700;
@@ -262,5 +272,11 @@ body {
     font-size: 1.5rem;
   }
 
+  .dash-button {
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 10px;
+    width: 25%;
+  }
 
 }

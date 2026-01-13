@@ -1,9 +1,9 @@
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, fetchSignInMethodsForEmail } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { setDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { setDoc, doc } from 'firebase/firestore';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const SignUpPage = () => {
@@ -14,49 +14,12 @@ const SignUpPage = () => {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
-  const [isTokenValid, setIsTokenValid] = useState(false); 
+  
   const router = useRouter();
 
-  useEffect(() => {
-    const checkInviteLink = async () => {
-      const token = new URLSearchParams(window.location.search).get('token');
-
-      if (!token) {
-        setError('Cannot access sign-up page. Please contact administrators to gain access.');
-        return;
-      }
-
-      const inviteDocRef = doc(db, 'Invitations', token);
-      const inviteDoc = await getDoc(inviteDocRef);
-
-      if (!inviteDoc.exists()) {
-        setError('Invalid invite link. Please contact the administrators of BoloRides.');
-        return;
-      }
-
-      const inviteData = inviteDoc.data();
-      const currentTime = new Date();
-      const expiresAt = inviteData.expiresAt ? inviteData.expiresAt.toDate() : null;
-
-      if (!expiresAt) {
-        setIsTokenValid(true); 
-        return;
-      }
-
-      if (inviteData.used) {
-        setError('This invite link has already been used. Please contact the administrators of BoloRides.');
-        return;
-      }
-
-      if (expiresAt < currentTime) {
-        setError('Invalid invite link, already expired. Please contact the administrators of BoloRides.');
-      } else {
-        setIsTokenValid(true); 
-      }
-    };
-
-    checkInviteLink();
-  }, []);
+  // Since we are removing the invite logic,
+  // you can directly set that the token is valid
+  const isTokenValid = true;
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -89,11 +52,7 @@ const SignUpPage = () => {
         role: 'user',
       });
 
-      const token = new URLSearchParams(window.location.search).get('token');
-      if (token) {
-        await updateDoc(doc(db, 'Invitations', token), { used: true });
-      }
-
+      // Instead of handling token, simply redirect to the dashboard
       router.push(`/dashboard/${user.uid}`);
     } catch (error) {
       console.error('Error signing up:', error);
@@ -102,22 +61,21 @@ const SignUpPage = () => {
   };
 
   return (
-
-     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <div className="signup p-10 rounded-lg shadow-xl w-96">
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+      <div className="signup p-6 md:p-10 rounded-lg shadow-xl w-full max-w-md h-auto mt-4">
         <h1 className="text-2xl mb-5">Sign Up</h1>
         {error && (
           <div>
             <p className="text-red-500">{error}</p>
-            <button 
-              onClick={() => router.push('/')} 
-              className="mt-4 w-full p-2 rounded bg-[#9b2f2f] text-white"
+            <button
+              onClick={() => router.push('/')}
+              className="mt-4 w-full p-2 rounded bg-[#9b2f2b] text-white"
             >
               Back to Home
             </button>
           </div>
         )}
-        {isTokenValid && (
+        {isTokenValid && (  // Always show the form now
           <form onSubmit={handleSignUp}>
             <label>UserName:</label>
             <input
@@ -188,7 +146,6 @@ const SignUpPage = () => {
         )}
       </div>
     </div>
-   
   );
 };
 

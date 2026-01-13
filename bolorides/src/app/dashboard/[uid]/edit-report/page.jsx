@@ -4,232 +4,175 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import ReCAPTCHA from 'react-google-recaptcha'; 
+import ReCAPTCHA from 'react-google-recaptcha';
 
-// Helper function to format numbers with commas
+// Safe number formatting
 const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (num === null || num === undefined) return '';
+  return Number(num).toLocaleString();
+};
+
+// Field configuration
+const fieldConfigs = {
+  revenue: [
+    { name: 'transactionDate', label: 'Transaction Date', type: 'date' },
+    { name: 'destination', label: 'Destination', type: 'text' },
+    { name: 'rentalRateAmount', label: 'Rental Rate Amount', type: 'number' },
+    { name: 'numberOfRentalDays', label: 'Number of Rental Days', type: 'number' },
+    { name: 'paidAmount', label: 'Paid Amount', type: 'number' },
+    { name: 'amountDue', label: 'Amount Due', type: 'number', readOnly: true },
+    { name: 'balanceAmount', label: 'Balance Amount', type: 'number', readOnly: true },
+  ],
+  expenses: [
+    { name: 'transactionDate', label: 'Transaction Date', type: 'date' },
+    { name: 'driverIncome', label: 'Driver Income', type: 'number' },
+    { name: 'carExpense', label: 'Car Expense', type: 'number' },
+    { name: 'expenseDescription', label: 'Expense Description', type: 'textarea' },
+    { name: 'comments', label: 'Comments', type: 'textarea' },
+  ],
 };
 
 const EditReport = () => {
-    const router = useRouter();
-    const [reportData, setReportData] = useState(null);
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [captchaToken, setCaptchaToken] = useState(''); // State for reCAPTCHA
+  const router = useRouter();
+  const [reportData, setReportData] = useState(null);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [captchaToken, setCaptchaToken] = useState('');
 
-    const query = new URLSearchParams(window.location.search);
-    const reportId = query.get('reportId');
-    const reportType = query.get('type');
-    const userId = query.get('userId');
+  const query = new URLSearchParams(window.location.search);
+  const reportId = query.get('reportId');
+  const reportType = query.get('type'); // revenue or expenses
+  const userId = query.get('userId');
 
-    useEffect(() => {
-        const fetchReportData = async () => {
-            try {
-                const reportDoc = await getDoc(doc(db, 'DailyReports', reportId));
-                if (reportDoc.exists()) {
-                    setReportData({ id: reportDoc.id, ...reportDoc.data() });
-                } else {
-                    setError('Report not found.');
-                    setTimeout(() => setError(''), 3000);
-                }
-            } catch (e) {
-                setError('Error fetching report data: ' + e.message);
-                setTimeout(() => setError(''), 3000);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchReportData();
-    }, [reportId]);
-
-    const handleChange = (field, value) => {
-        if (value < 0) {
-            setError('Invalid value; negative numbers are not supported.');
-            setTimeout(() => setError(''), 3000);
-            return;
+  // Fetch report data
+  useEffect(() => {
+    const fetchReportData = async () => {
+      try {
+        const reportDoc = await getDoc(doc(db, 'DailyReports', reportId));
+        if (!reportDoc.exists()) {
+          setError('Report not found.');
+          setLoading(false);
+          return;
         }
+        const data = reportDoc.data();
 
-        setReportData(prev => {
-            const updatedData = { ...prev, [field]: value };
-            if (reportType === 'revenue') {
-                const amountDue = updatedData.rentalRateAmount * updatedData.numberOfRentalDays;
-                const balanceAmount = amountDue - (updatedData.paidAmount || 0);
-                return { ...updatedData, amountDue, balanceAmount };
-            }
-            return updatedData;
+        // Normalize all fields to avoid undefined/null
+        const normalizedData = {};
+        fieldConfigs[reportType].forEach(f => {
+          if (f.type === 'number') normalizedData[f.name] = data[f.name] || 0;
+          else normalizedData[f.name] = data[f.name] || '';
         });
+
+        setReportData({ id: reportDoc.id, ...normalizedData });
+      } catch (e) {
+        setError('Error fetching report data: ' + e.message);
+      } finally {
+        setLoading(false);
+      }
     };
+    if (reportId) fetchReportData();
+  }, [reportId, reportType]);
 
-    const handleInputChange = (field, value) => {
-        const numericValue = value.replace(/[^0-9]/g, ''); // Allow only digits
-        handleChange(field, numericValue ? Number(numericValue) : '');
-    };
+  // Handle input change
+  const handleChange = (field, value, type) => {
+    if (type === 'number' && value < 0) {
+      setError('Negative numbers are not supported.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!reportData) return;
+    setReportData(prev => {
+      const updatedData = { ...prev, [field]: type === 'number' ? Number(value) : value };
 
-        if (reportType === 'revenue' && reportData.paidAmount > reportData.amountDue) {
-            setError('Error: Paid amount exceeds amount due. Enter a valid amount.');
-            setTimeout(() => setError(''), 3000);
-            return;
-        }
+      // Calculate amountDue & balance for revenue
+      if (reportType === 'revenue') {
+        const rentalRateAmount = Number(updatedData.rentalRateAmount) || 0;
+        const numberOfRentalDays = Number(updatedData.numberOfRentalDays) || 0;
+        const paidAmount = Number(updatedData.paidAmount) || 0;
+        updatedData.amountDue = rentalRateAmount * numberOfRentalDays;
+        updatedData.balanceAmount = Math.max(0, updatedData.amountDue - paidAmount);
+      }
 
-        if (!captchaToken) { // Validate reCAPTCHA token
-            setError('Please complete the reCAPTCHA.');
-            return;
-        }
+      return updatedData;
+    });
+  };
 
-        try {
-            setSuccessMessage('Processing, hold on please...');
-            await updateDoc(doc(db, 'DailyReports', reportId), reportData);
-            setSuccessMessage('Form data successfully edited, thank you!');
-            setTimeout(() => {
-                router.push(`/dashboard/${userId}?carId=${reportData.carId}`);
-            }, 3000);
-        } catch (e) {
-            setError('Failed to edit form data: ' + e.message);
-            setTimeout(() => setError(''), 3000);
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!reportData) return;
 
-    if (loading) return <p>Loading...</p>;
+    if (reportType === 'revenue' && reportData.paidAmount > reportData.amountDue) {
+      setError('Paid amount exceeds amount due.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
 
-    return (
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-            <h2 className="text-xl font-semibold mb-4 text-[#9b2f2b] text-center">Edit {reportType === 'revenue' ? 'Revenue' : 'Expense'} Report</h2>
-            <br />
-            {reportType === 'revenue' && (
-                <>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Transaction Date:</label>
-                        <input
-                            type="date"
-                            value={reportData.transactionDate || ''}
-                            onChange={(e) => handleChange('transactionDate', e.target.value)}
-                            required
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Destination:</label>
-                        <input
-                            type="text"
-                            value={reportData.destination || ''}
-                            onChange={(e) => handleChange('destination', e.target.value)}
-                            required
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Rental Rate Amount:</label>
-                        <input
-                            type="text"
-                            value={reportData.rentalRateAmount ? formatNumber(reportData.rentalRateAmount) : ''}
-                            onChange={(e) => handleInputChange('rentalRateAmount', e.target.value)}
-                            required
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Number of Rental Days:</label>
-                        <input
-                            type="text"
-                            value={reportData.numberOfRentalDays ? formatNumber(reportData.numberOfRentalDays) : ''}
-                            onChange={(e) => handleInputChange('numberOfRentalDays', e.target.value)}
-                            required
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Paid Amount:</label>
-                        <input
-                            type="text"
-                            value={reportData.paidAmount ? formatNumber(reportData.paidAmount) : ''}
-                            onChange={(e) => handleInputChange('paidAmount', e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Amount Due:</label>
-                        <input
-                            type="text"
-                            value={formatNumber(reportData.amountDue || 0)}
-                            readOnly
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Balance Amount:</label>
-                        <input
-                            type="text"
-                            value={formatNumber(reportData.balanceAmount || 0)}
-                            readOnly
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                </>
-            )}
-            {reportType === 'expenses' && (
-                <>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Driver Income:</label>
-                        <input
-                            type="text"
-                            value={reportData.driverIncome ? formatNumber(reportData.driverIncome) : ''}
-                            onChange={(e) => handleInputChange('driverIncome', e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                            required
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Car Expense:</label>
-                        <input
-                            type="text"
-                            value={reportData.carExpense ? formatNumber(reportData.carExpense) : ''}
-                            onChange={(e) => handleInputChange('carExpense', e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                            required
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Expense Description:</label>
-                        <textarea
-                            value={reportData.expenseDescription || ''}
-                            onChange={(e) => handleChange('expenseDescription', e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                    <div className="w-11/12 md:w-85% mx-auto">
-                        <label className="block">Comments:</label>
-                        <textarea
-                            value={reportData.comments || ''}
-                            onChange={(e) => handleChange('comments', e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                    </div>
-                </>
-            )}
-            <ReCAPTCHA 
-                sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY} 
-                onChange={setCaptchaToken} 
-                className="mb-4" 
+    if (!captchaToken) {
+      setError('Please complete the reCAPTCHA.');
+      return;
+    }
+
+    try {
+      setSuccessMessage('Processing...');
+      await updateDoc(doc(db, 'DailyReports', reportId), reportData);
+      setSuccessMessage('Report updated successfully!');
+      setTimeout(() => router.push(`/dashboard/${userId}?carId=${reportData.carId}`), 2000);
+    } catch (e) {
+      setError('Failed to update report: ' + e.message);
+    }
+  };
+
+  if (loading) return <p className="text-center py-8">Loading...</p>;
+  if (!reportData) return <p className="text-center text-red-500">No data found.</p>;
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg shadow-lg space-y-4 max-w-2xl mx-auto mt-20 lg:mt-20">
+      <h2 className="text-2xl font-bold text-center text-[#9b2f2b]">
+        Edit {reportType === 'revenue' ? 'Revenue' : 'Expenses'} Report
+      </h2>
+
+      {fieldConfigs[reportType].map(field => (
+        <div key={field.name}>
+          <label className="block font-semibold">{field.label}:</label>
+
+          {field.type === 'textarea' ? (
+            <textarea
+              value={reportData[field.name]}
+              onChange={e => handleChange(field.name, e.target.value, field.type)}
+              className="border p-2 rounded w-full"
             />
-            <div className="flex justify-center">
-                <button 
-                    type="submit" 
-                    className="bg-[#9b2f2b] text-white p-2 rounded w-1/2 md:w-auto"
-                >
-                    Update Report
-                </button>
-            </div>
-            {successMessage && <p className="text-green-500 mt-4">{successMessage}</p>}
-            {error && <p className="text-red-500 mt-4">{error}</p>}
-        </form>
-    );
+          ) : (
+            <input
+              type={field.type === 'number' ? 'text' : field.type}
+              value={field.type === 'number' ? formatNumber(reportData[field.name]) : reportData[field.name]}
+              onChange={e => handleChange(field.name, e.target.value.replace(/,/g, ''), field.type)}
+              readOnly={field.readOnly}
+              required={!field.readOnly}
+              className={`border p-2 rounded w-full ${field.readOnly ? 'bg-gray-100' : ''}`}
+            />
+          )}
+        </div>
+      ))}
+
+      <ReCAPTCHA
+        sitekey={process.env.NEXT_PUBLIC_CAPTCHA_SITE_KEY}
+        onChange={setCaptchaToken}
+      />
+
+      <div className="flex justify-center mt-4">
+        <button
+          type="submit"
+          className="bg-[#9b2f2b] text-white font-semibold p-3 rounded-lg w-1/2"
+        >
+          Update Report
+        </button>
+      </div>
+
+      {successMessage && <p className="text-green-600 text-center mt-3">{successMessage}</p>}
+      {error && <p className="text-red-500 text-center mt-3">{error}</p>}
+    </form>
+  );
 };
 
 export default EditReport;

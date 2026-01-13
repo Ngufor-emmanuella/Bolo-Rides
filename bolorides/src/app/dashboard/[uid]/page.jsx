@@ -25,7 +25,8 @@ const UserDashboard = () => {
     const [showAddCarForm, setShowAddCarForm] = useState(false);
     const [showTransactionForm, setShowTransactionForm] = useState(false);
     const [showDailyReports, setShowDailyReports] = useState(false);
-    const [transactions, setTransactions] = useState([{ type: 'revenue', data: {} }]);
+    const initialTransactionState = [{ type: 'revenue', data: {} }];
+    const [transactions, setTransactions] = useState(initialTransactionState);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [userRole, setUserRole] = useState('');
 
@@ -48,13 +49,18 @@ const UserDashboard = () => {
                     const carSnapshot = await getDocs(carQuery);
                     const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setCars(carList);
+
+                    if (carList.length > 0) {
+                        setActiveCarId(carList[0].id);
+                        setShowTransactionForm(true);
+                    }
                 } catch (e) {
                     console.error("Error fetching user data:", e);
                     setError("Error fetching user data.");
                 }
             } else {
                 router.push('/Sign-in');
-            }          
+            }
         });
 
         return () => unsubscribe();
@@ -66,7 +72,6 @@ const UserDashboard = () => {
         setSuccess('');
         setLoadingMessage('Adding car, hold on...');
 
-        // Check if all fields are filled
         if (!carName || !carType) {
             setError('Please fill all fields and upload three images.');
             return;
@@ -75,7 +80,7 @@ const UserDashboard = () => {
         try {
             if (!user) {
                 throw new Error("User is not authenticated.");
-            }           
+            }
 
             const carData = {
                 userId: user.uid,
@@ -86,7 +91,6 @@ const UserDashboard = () => {
                 created_at: new Date(),
             };
 
-              // Upload images if any are provided
             const imageUrls = await Promise.all(
                 images.map(async (image) => {
                     if (image) {
@@ -94,22 +98,27 @@ const UserDashboard = () => {
                         await uploadBytes(storageRef, image);
                         return getDownloadURL(storageRef);
                     }
-                    return null; // Return null for missing images
+                    return null;
                 })
             );
 
-            // Only add non-null URLs to carData.images
             carData.images = imageUrls.filter(url => url !== null);
 
-            await addDoc(collection(db, 'Cars'), carData);
+            const carDocRef = await addDoc(collection(db, 'Cars'), carData);
             setSuccess(`${carName} added successfully!`);
             setCarName('');
             setCarType('');
             setImages([null, null, null]);
+
             const carQuery = query(collection(db, 'Cars'), where('userId', '==', user.uid));
             const carSnapshot = await getDocs(carQuery);
             const carList = carSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setCars(carList);
+
+            if (carList.length > 0) {
+                setActiveCarId(carDocRef.id);
+                setShowTransactionForm(true);
+            }
         } catch (error) {
             console.error('Error adding car:', error);
             setError(`Failed to add car name successfully: ${error.message}`);
@@ -122,12 +131,11 @@ const UserDashboard = () => {
         }
     };
 
-
     const handleCarSelect = (car) => {
         setActiveCarId(car.id);
-        setShowTransactionForm(false);
+        setShowTransactionForm(true);
         setShowDailyReports(false);
-        setTransactions([{ type: 'revenue', data: {} }]);
+        setTransactions(initialTransactionState);
         setSidebarOpen(false);
     };
 
@@ -155,6 +163,13 @@ const UserDashboard = () => {
         try {
             await addDoc(collection(db, 'DailyReports'), reportData);
             setSuccess('Report submitted successfully!');
+            setTransactions(initialTransactionState); // Reset immediately on success
+            
+            // After 1 minute (60000ms), reset form again to ensure any lingering data is cleared
+            setTimeout(() => {
+                setTransactions(initialTransactionState);
+            }, 60000);
+            
         } catch (error) {
             console.error('Error adding report:', error.message);
             setError('Error adding report: ' + error.message);
@@ -169,7 +184,7 @@ const UserDashboard = () => {
 
     return (
         <div>
-            <header className="flex justify-center items-center p-4">
+            <header className="flex justify-center items-center p-4 pt-20">
                 <h1 className="text-2xl text-center mt-5">Welcome, {userName || user?.email}!</h1>
                 <button
                     className="md:hidden p-2 mt-5 text-white bg-[#9b2f2b] rounded z-50 ml-4"
@@ -186,7 +201,7 @@ const UserDashboard = () => {
                     <h2 className="text-xl font-bold">My Cars.</h2>
                     <ul>
                         {cars.map(car => (
-                            <li key={car.id} className="my-2">
+                            <li key={car.id} className="my-2 mt-7">
                                 <button
                                     className={`text-left w-full p-2 rounded ${activeCarId === car.id ? 'bg-[#9b2f2b] text-white' : 'bg-blue-500 text-white'}`}
                                     onClick={() => handleCarSelect(car)}
@@ -196,10 +211,9 @@ const UserDashboard = () => {
                             </li>
                         ))}
 
-                        {/* Button to access admin dashboard */}
                         {userRole === 'admin' || userRole === 'supreme' ? (
                             <button
-                            onClick={() => router.push(`/admin?userId=${encodeURIComponent(user.uid)}`)}
+                                onClick={() => router.push(`/admin?userId=${encodeURIComponent(user.uid)}`)}
                                 className="mt-4 bg-red-500 text-white p-2 rounded"
                             >
                                 Go to Admin Dashboard
@@ -231,30 +245,6 @@ const UserDashboard = () => {
                                 required
                                 className="border p-2 mb-2 w-full"
                             />
-                            {/* Image Uploads of car  */}
-                            {/* <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(0, e)}
-                               
-                                className="border p-2 mb-2 w-full"
-                            /> */}
-                            {/* <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(1, e)}
-                              
-                                className="border p-2 mb-2 w-full"
-                            /> */}
-                            {/* <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageChange(2, e)}
-                               
-                                className="border p-2 mb-2 w-full"
-                            /> */}
-
-
                             <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">Submit</button>
                             {loadingMessage && <p className="mt-2 text-yellow-500">{loadingMessage}</p>}
                             {success && <p className="mt-2 text-green-500">{success}</p>}

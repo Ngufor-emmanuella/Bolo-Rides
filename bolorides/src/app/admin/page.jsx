@@ -1,16 +1,14 @@
 'use client';
-
 import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc, deleteDoc, query, where } from 'firebase/firestore';
 import UserCars from './userCars';
 import UserReports from './userReports';
-import MonthlyReport from './monthlyReports'; 
+import MonthlyReport from './monthlyReports';
 import ViewBookingHistory from './viewBookingHistory';
 import InviteUser from './inviteUser';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
-
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -29,33 +27,26 @@ const AdminDashboard = () => {
     const [processing, setProcessing] = useState(false);
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [showBookingHistory, setShowBookingHistory] = useState(false); 
-
+    const [showBookingHistory, setShowBookingHistory] = useState(true);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const searchParams = useSearchParams();
-    
     const supremeAdminId = process.env.NEXT_PUBLIC_SUPREME_ADMIN_ID;
-    const router = useRouter(); 
+    const router = useRouter();
 
-    
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const usersCollection = collection(db, 'Users');
                 const usersSnapshot = await getDocs(usersCollection);
                 const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
                 setUsers(usersList);
                 const allAdmins = usersList.filter(user => user.role === 'admin' || user.role === 'supreme');
                 setAdmins(allAdmins.sort((a, b) => (a.role === 'supreme' ? -1 : 1)));
-
-                // Get userId from the query params
-                
                 const userId = searchParams.get('userId');
-
                 if (userId) {
                     const loggedInUser = usersList.find(user => user.id === userId);
                     if (loggedInUser) {
-                        setCurrentUser(loggedInUser); 
+                        setCurrentUser(loggedInUser);
                     }
                 }
             } catch (err) {
@@ -65,9 +56,8 @@ const AdminDashboard = () => {
                 setLoading(false);
             }
         };
-
         fetchUsers();
-    }, [router.query]); 
+    }, [router.query]);
 
     const handleUserClick = (userId) => {
         setExpandedUserId(expandedUserId === userId ? null : userId);
@@ -75,14 +65,18 @@ const AdminDashboard = () => {
         setShowReports(false);
         setReports([]);
         setViewingMonthlyReport(false);
+        setSelectedCarName('');
+        setSelectedUserName('');
     };
 
     const handleCarClick = (carId, carName, userName) => {
         setSelectedCarId(carId);
         setSelectedCarName(carName);
         setSelectedUserName(userName);
-        setShowReports(false);
-        setViewingMonthlyReport(false);
+        setShowReports(true);
+        setShowBookingHistory(false);
+        fetchReports(carId);
+        setSidebarOpen(false);
     };
 
     const fetchReports = async (carId) => {
@@ -91,7 +85,6 @@ const AdminDashboard = () => {
         const userReports = reportsSnapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
             .filter(report => report.carId === carId);
-
         setReports(userReports);
     };
 
@@ -99,12 +92,17 @@ const AdminDashboard = () => {
         if (selectedCarId) {
             await fetchReports(selectedCarId);
             setShowReports(prev => !prev);
-            setViewingMonthlyReport(false); 
+            setViewingMonthlyReport(false);
         }
     };
 
+    const handleViewBookingHistory = () => {
+        setShowBookingHistory(true);
+        setSidebarOpen(false);
+    };
+
     const handleViewMonthlyReports = () => {
-        setViewingMonthlyReport(prev => !prev); 
+        setViewingMonthlyReport(prev => !prev);
         setShowReports(false);
     };
 
@@ -117,7 +115,7 @@ const AdminDashboard = () => {
         const userRef = doc(db, 'Users', userId);
         try {
             await updateDoc(userRef, { role: 'admin' });
-            const updatedUsers = users.map(user => 
+            const updatedUsers = users.map(user =>
                 user.id === userId ? { ...user, role: 'admin' } : user
             );
             setUsers(updatedUsers);
@@ -141,7 +139,7 @@ const AdminDashboard = () => {
         const userRef = doc(db, 'Users', userId);
         try {
             await updateDoc(userRef, { role: 'user' });
-            const updatedUsers = users.map(user => 
+            const updatedUsers = users.map(user =>
                 user.id === userId ? { ...user, role: 'user' } : user
             );
             setUsers(updatedUsers);
@@ -157,8 +155,78 @@ const AdminDashboard = () => {
         }
     };
 
+    const deleteCar = async (carId) => {
+        if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'supreme')) {
+            setError('You do not have permission to delete cars.');
+            return;
+        }
+        setProcessing(true);
+        try {
+            await deleteDoc(doc(db, 'Cars', carId));
+
+            const reportsQuery = query(collection(db, 'DailyReports'), where('carId', '==', carId));
+            const reportsSnapshot = await getDocs(reportsQuery);
+            await Promise.all(reportsSnapshot.docs.map(reportDoc => deleteDoc(doc(db, 'DailyReports', reportDoc.id))));
+
+            await refetchUsers();
+            resetSelections();
+
+            setMessage('Car and associated reports deleted successfully!');
+            setTimeout(() => setMessage(''), 3000);
+        } catch (error) {
+            console.error('Error deleting car:', error);
+            setError('Failed to delete the car: ' + error.message);
+            setTimeout(() => setError(''), 3000);
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const resetSelections = () => {
+        setSelectedCarId(null);
+        setSelectedCarName('');
+        setSelectedUserName('');
+        setShowReports(false);
+        setReports([]);
+    };
+
+    const refetchUsers = async () => {
+        setLoading(true);
+        try {
+            const usersCollection = collection(db, 'Users');
+            const usersSnapshot = await getDocs(usersCollection);
+            const usersList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setUsers(usersList);
+            const allAdmins = usersList.filter(user => user.role === 'admin' || user.role === 'supreme');
+            setAdmins(allAdmins.sort((a, b) => (a.role === 'supreme' ? -1 : 1)));
+        } catch (err) {
+            setError('Failed to refresh users.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteCarClick = (carId) => {
+        setSelectedCarId(carId);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeleteCar = () => {
+        if (selectedCarId) {
+            deleteCar(selectedCarId);
+            setShowDeleteModal(false);
+        }
+    };
+
+    const cancelDeleteCar = () => {
+        setShowDeleteModal(false);
+    };
+
     const toggleBookingHistory = () => {
         setShowBookingHistory(prev => !prev);
+        if (!showBookingHistory) {
+            setSidebarOpen(false);
+        }
     };
 
     if (loading) return <div>Loading...</div>;
@@ -166,21 +234,22 @@ const AdminDashboard = () => {
 
     return (
         <div className="flex flex-col md:flex-row">
-           
             {/* Aside Navigation */}
-            <aside className={`fixed inset-y-0 left-0 w-3/5 pt-23 md:pt-4 bg-gray-200 p-4 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static md:w-1/4`}>
+            <aside className={`fixed inset-y-0 left-0 w-4/5 md:w-auto md:min-w-[calc(1.7/5*100%)] bg-gray-200 p-4 
+            overflow-y-auto md:overflow-y-visible /* vertical scroll only on mobile */ 
+            flow-x-hidden /* removes horizontal scrollbar on desktop */
+            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 md:translate-x-0 md:static`}>
+                
                 {currentUser ? (
-                    <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, {currentUser.name}!</h1>
+                    <h1 className="text-xl text-[#9b2f2b] mb-4 mt-20">Welcome, {currentUser.name}!</h1>
                 ) : (
                     <h1 className="text-xl text-[#9b2f2b] mb-4">Welcome, Supreme Admin!</h1>
                 )}
-
                 <InviteUser />
                 <br />
                 <hr />
                 <br />
-
-                <h3 className="text-xl mb-2">List Of All Admins</h3>
+                <h3 className="text-[#9b2f2b] text-xl mb-2">List Of All Admins</h3>
                 {admins.map(admin => (
                     <div key={admin.id} className="mb-2">
                         <span>{admin.name} ({admin.email})</span>
@@ -189,20 +258,21 @@ const AdminDashboard = () => {
                 
                 <br />
                 <hr />
+               
+            
+                {currentUser?.role === 'admin' && (
+                    <button
+                        onClick={() => {
+                            router.push(`/dashboard/${currentUser.id}`); 
+                        }}
+                        className="mt-4 bg-green-500 text-white p-2 rounded w-full"
+                    >
+                        Return to Driver's Account
+                    </button>
+                )}
                 <br />
-
-                 {/* Button to toggle booking history */}
-                 <button 
-                    onClick={toggleBookingHistory} 
-                    className="mt-4 bg-[#9b2f2b] text-white p-2 rounded w-full"
-                >
-                    {showBookingHistory ? 'Hide Booking History' : 'View Booking History'}
-                </button>
-
                 <br />
-                <br />
-
-                <h3 className="text-xl mb-2">List Of All Users</h3>
+                <h3 className="text-[#9b2f2b] text-xl mb-2">List Of All Users</h3>
                 {users.map(user => (
                     <div key={user.id} className="mb-2">
                         <div className="flex justify-between items-center">
@@ -215,7 +285,7 @@ const AdminDashboard = () => {
                             {user.role === 'user' && (
                                 <button 
                                     onClick={() => promoteUserToAdmin(user.id)} 
-                                    className="ml-2 bg-[#9b2f2b] text-white p-1 rounded"
+                                    className=" bg-[#9b2f2b] text-white p-1 rounded"
                                     disabled={processing}
                                 >
                                     Promote to Admin
@@ -230,6 +300,15 @@ const AdminDashboard = () => {
                                     Remove Admin
                                 </button>
                             )}
+                            {(currentUser?.role === 'admin' || currentUser?.role === 'supreme') && selectedCarId && selectedUserName === user.name && (
+                                <button 
+                                    onClick={() => handleDeleteCarClick(selectedCarId)} 
+                                    className="ml-1 bg-red-400 text-white p-1 rounded"
+                                    disabled={processing}
+                                >
+                                    Delete Car
+                                </button>
+                            )}
                         </div>
                         <br />
                         {expandedUserId === user.id && (
@@ -242,19 +321,17 @@ const AdminDashboard = () => {
                     </div>
                 ))}
             </aside>
-
             <main className="flex-1 p-4">
-                <div className="flex items-center justify-center mb-4">
-                    <h1 className="text-2xl text-[#9b2f2b] pr-3">Admin Dashboard</h1>
+                <div className="flex items-center justify-center mb-2 pt-20 ">
+                    <h1 className="text-2xl text-[#9b2f2b] pr-3 ">Admin Dashboard</h1>
                     
                     <button 
-                        className="md:hidden p-2 text-white bg-[#9b2f2b] rounded z-50"
+                        className="md:hidden p-2 text-white bg-[#9b2f2b] rounded z-50 mr-8"
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                     >
                         {sidebarOpen ? 'X' : '☰'}
                     </button>
                 </div>
-
                 {showBookingHistory ? (
                     <ViewBookingHistory /> 
                 ) : (
@@ -270,37 +347,38 @@ const AdminDashboard = () => {
                                     >
                                         {showReports ? 'Hide All Transactions' : 'View All Transactions'}
                                     </button>
-
                                     <button
                                         onClick={() => setViewingMonthlyReport(true)}
                                         className="bg-[#9b2f2b] text-white p-2 rounded mr-2"
                                     >
                                         Fetch Monthly Report
                                     </button>
-
-                                    <input
-                                        type="number"
-                                        value={reportYear}
-                                        onChange={handleYearChange}
-                                        placeholder="Enter Year (e.g., 2024)"
-                                        className="border p-1 ml-2"
-                                    />
                                 </div>
-
-                                {/* Show UserReports if selected */}
                                 {showReports && <UserReports reports={reports} />}
-                                
-                                {/* Show MonthlyReport if selected */}
-                                {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} year={reportYear} />}
+                                {viewingMonthlyReport && <MonthlyReport carId={selectedCarId} carName={selectedCarName} year={reportYear} />}
                             </div>
                         )}
-
                         {message && <div className="mt-4 p-2 bg-green-200 text-green-800 rounded">{message}</div>}
+                        {error && <div className="mt-4 p-2 bg-red-200 text-red-800 rounded">{error}</div>}
                     </>
                 )}
             </main>
+
+            {/* Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: '#00000070' }}>
+                    <div className="bg-white p-6 rounded shadow-md">
+                        <h2 className="text-lg mb-4">Are you sure you want to delete this car?</h2>
+                        <p className="mb-4">Once deleted, this action cannot be undone.</p>
+                        <div className="flex justify-end">
+                            <button onClick={cancelDeleteCar} className="mr-2 bg-gray-300 text-black p-2 rounded">No</button>
+                            <button onClick={confirmDeleteCar} className="bg-red-500 text-white p-2 rounded">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
-export default AdminDashboard;
+export default AdminDashboard
